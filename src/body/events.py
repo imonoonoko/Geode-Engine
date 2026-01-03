@@ -1,5 +1,5 @@
 # events.py
-# Geode Event System - Pub/Sub Pattern for Decoupled Architecture
+# Kaname Event System - Pub/Sub Pattern for Decoupled Architecture
 
 from enum import Enum, auto
 from typing import Callable, Dict, List, Any

@@ -388,7 +388,7 @@ class SedimentaryCortex:
         意味的に類似した記憶をクラスタリングし、代表以外を削除する。
         
         Args:
-            brain_ref: GeodeBrain instance (for PredictionEngine access)
+            brain_ref: KanameBrain instance (for PredictionEngine access)
         """
     def compress_memory(self, brain_ref=None):
         """ 

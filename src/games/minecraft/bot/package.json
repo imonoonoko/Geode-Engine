@@ -1,7 +1,7 @@
 {
-  "name": "Geode-minecraft-bot",
+  "name": "kaname-minecraft-bot",
   "version": "1.0.0",
-  "description": "Mineflayer bot for Geode-Engine AI",
+  "description": "Mineflayer bot for Kaname AI",
   "main": "bot.js",
   "dependencies": {
     "canvas": "^3.2.0",

@@ -28,7 +28,7 @@ class AttentionManager:
     def __init__(self, brain):
         """
         Args:
-            brain: GeodeBrain インスタンス
+            brain: KanameBrain インスタンス
         """
         self.brain = brain
         self.lock = threading.Lock()

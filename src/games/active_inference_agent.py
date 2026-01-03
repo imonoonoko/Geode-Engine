@@ -16,7 +16,7 @@ class FreeEnergyComponent:
 
 class ActiveInferenceAgent:
     """
-    Geode Active Inference Agent (Phase 1: Dark Room)
+    Kaname Active Inference Agent (Phase 1: Dark Room)
     
     報酬最大化(RL)ではなく、期待自由エネルギー最小化(Active Inference)で動くエージェント。
     
@@ -46,18 +46,18 @@ class ActiveInferenceAgent:
         self.episode_count = 0
         self.last_free_energy_components: List[FreeEnergyComponent] = []
         
-        # Geode システムへの参照
+        # Kaname システムへの参照
         self.meta_learner = None
         self.world_model = None
         self.memory = None
         
-        self._init_Geode_systems()
+        self._init_kaname_systems()
         
         print(f"🧠 Active Inference Agent (Pure) Initialized.")
         print(f"   Actions: {action_size}, Precision: {precision}, Curiosity: {curiosity}")
 
-    def _init_Geode_systems(self):
-        """Geode システムへの参照を初期化"""
+    def _init_kaname_systems(self):
+        """Kaname システムへの参照を初期化"""
         if not self.brain:
             return
         

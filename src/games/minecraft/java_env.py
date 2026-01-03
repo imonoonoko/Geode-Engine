@@ -19,7 +19,7 @@ except ImportError:
 class MinecraftJavaEnv:
     """
     MineRL環境ラッパー。
-    Java版Minecraftをヘッドレスで実行し、Geodeの脳と接続する。
+    Java版Minecraftをヘッドレスで実行し、カナメの脳と接続する。
     
     特徴:
     - バックグラウンド実行可能
@@ -170,7 +170,7 @@ class MinecraftJavaEnv:
     
     def create_action_from_intent(self, intent: str, **kwargs) -> Dict[str, Any]:
         """
-        Geodeの意図をMineRLアクションに変換。
+        カナメの意図をMineRLアクションに変換。
         
         Args:
             intent: "MOVE_FORWARD", "TURN_LEFT", "JUMP", "ATTACK" など

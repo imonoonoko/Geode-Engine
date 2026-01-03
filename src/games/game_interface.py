@@ -9,7 +9,7 @@ import threading
 class GameEnvironment(ABC):
     """
     すべてのゲーム環境の基底クラス。
-    Geodeの脳と接続するための統一インターフェースを定義。
+    カナメの脳と接続するための統一インターフェースを定義。
     """
     
     def __init__(self, brain=None):

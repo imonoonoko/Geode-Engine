@@ -35,9 +35,9 @@ except ImportError:
 
 # 🧠 BRAIN (The Core)
 # ==========================================
-class GeodeBrain:
+class KanameBrain:
     def __init__(self):
-        print("🧠 Initializing Geode Brain (Phase 10 Stable)...")
+        print("🧠 Initializing Kaname Brain (Phase 10 Stable)...")
         self.is_alive = True
         self.time_step = 0
         
@@ -747,8 +747,8 @@ class GeodeBrain:
                          new_persona = random.choice(config.AGNI_PERSONA_ROTATION)
                          self.mentor.set_persona(new_persona)
 
-                    # [Diversity Fix]: If memory is empty or stuck on "Geode", inject fresh concepts
-                    if not seed or seed == "Geode" or seed == "Geode":
+                    # [Diversity Fix]: If memory is empty or stuck on "Kaname", inject fresh concepts
+                    if not seed or seed == "Kaname" or seed == "カナメ":
                          fallback_seeds = ["世界", "時間", "命", "心", "夢", "星", "海", "AI", "人間"]
                          seed = random.choice(fallback_seeds)
 
@@ -760,7 +760,7 @@ class GeodeBrain:
                             # Checking Graduation
                             if random.random() < 0.05: # Occasional check
                                 if self.mentor.check_graduation():
-                                    print("🎓 Geode is ready to graduate!")
+                                    print("🎓 Kaname is ready to graduate!")
                                     # config.EDUCATION_MODE = False (Automatic OFF?)
                 
             except Exception as e:

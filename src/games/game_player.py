@@ -4,7 +4,7 @@ import io
 
 # game_player.py
 # Game AI Phase C: 統合コントローラー
-# Geode本体との連携
+# Kaname本体との連携
 
 import time
 import threading
@@ -26,7 +26,7 @@ import os
 
 class GameViewerProcess:
     """外部プロセスとして実行されるゲームビューワーのラッパー"""
-    def __init__(self, title="Geode Game"):
+    def __init__(self, title="Kaname Game"):
         self.process = None
         self.title = title
 
@@ -108,8 +108,8 @@ class GamePlayer:
     def __init__(self, brain=None, body=None, headless: bool = False):
         """
         Args:
-            brain: Geode の Brainへの参照
-            body: Geode の Bodyへの参照
+            brain: Kaname の Brainへの参照
+            body: Kaname の Bodyへの参照
             headless: True=ウィンドウなし, False=ウィンドウあり
         """
         self.brain = brain
@@ -188,7 +188,7 @@ class GamePlayer:
             
             # GUI ウィンドウ起動（headless=Falseの場合）
             if not self.headless:
-                self.window = GameWindow(title=f"Geode: {self.current_game_type}")
+                self.window = GameWindow(title=f"Kaname: {self.current_game_type}")
                 self.window.start()
             
             self.is_playing = True
@@ -227,7 +227,7 @@ class GamePlayer:
         if not self.headless:
             # ウィンドウを開く
             if not self.window:
-                self.window = GameWindow(title=f"Geode: {self.current_game_type}")
+                self.window = GameWindow(title=f"Kaname: {self.current_game_type}")
                 self.window.start()
             print("👁️ Visual ON")
         else:
@@ -352,7 +352,7 @@ class GamePlayer:
         if context:
             self.last_commentary_time = now
             
-            # Brain に状況を通知（Geode が自分で言葉を選ぶ）
+            # Brain に状況を通知（Kaname が自分で言葉を選ぶ）
             if self.brain and hasattr(self.brain, 'input_stimulus'):
                 # ゲーム状況をテキスト形式で入力（発話内容は指定しない）
                 stimulus = f"[ゲーム状況] score={context.get('score')} game_over={context.get('game_over')}"

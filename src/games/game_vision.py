@@ -1,6 +1,6 @@
 # game_vision.py
 # ゲーム画面のOCR + 概念学習
-# ゲーム内の文字を読み取り、Geodeの概念として学習
+# ゲーム内の文字を読み取り、Kanameの概念として学習
 
 import time
 import threading
@@ -43,7 +43,7 @@ class GameVision:
     def __init__(self, brain=None, languages: List[str] = None):
         """
         Args:
-            brain: Geode の Brain への参照
+            brain: Kaname の Brain への参照
             languages: OCR対応言語（デフォルト: 日英）
         """
         self.brain = brain
@@ -73,7 +73,7 @@ class GameVision:
         self.word_binding = None
         
         self._init_ocr()
-        self._init_Geode_systems()
+        self._init_kaname_systems()
         
         status = "✅" if _OCR_AVAILABLE else "❌ (pip install easyocr)"
         print(f"👁️ Game Vision Initialized. OCR: {status}")
@@ -95,8 +95,8 @@ class GameVision:
             print(f"⚠️ OCR Init Error: {e}")
             self.ocr_engine = None
     
-    def _init_Geode_systems(self):
-        """Geode システムへの参照を初期化"""
+    def _init_kaname_systems(self):
+        """Kaname システムへの参照を初期化"""
         if not self.brain:
             return
         
@@ -260,7 +260,7 @@ class GameVision:
         ゲーム状況のコンテキストを取得
         
         Returns:
-            状況コンテキスト（Geodeが自分で言葉を選ぶ材料）
+            状況コンテキスト（Kanameが自分で言葉を選ぶ材料）
             または None（話すことがない場合）
         """
         if not self.text_history:

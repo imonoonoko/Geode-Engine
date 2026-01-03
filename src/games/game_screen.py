@@ -18,7 +18,7 @@ class GameScreen:
     """
     ゲーム画面のキャプチャと前処理
     
-    既存の GeodeSenses/Retina のコードを参考に、
+    既存の KanameSenses/Retina のコードを参考に、
     ゲームプレイに特化したシンプルな実装。
     """
     

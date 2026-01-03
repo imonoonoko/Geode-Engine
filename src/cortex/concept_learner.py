@@ -27,7 +27,7 @@ class ConceptLearner:
     def __init__(self, brain, data_dir="memory"):
         """
         Args:
-            brain: GeodeBrain インスタンス
+            brain: KanameBrain インスタンス
             data_dir: 学習データの保存先
         """
         self.brain = brain

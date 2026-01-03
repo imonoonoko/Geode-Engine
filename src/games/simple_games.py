@@ -1,5 +1,5 @@
 # simple_games.py
-# Geode 用シンプルゲーム環境
+# Kaname 用シンプルゲーム環境
 # ブラウザ不要！Python で直接動作
 
 import numpy as np

@@ -5,7 +5,7 @@ import src.dna.config as config
 
 import collections
 
-class GeodeImmuneSystem:
+class KanameImmuneSystem:
     def __init__(self, brain_ref):
         print("🛡️ Initializing Immune System (White Blood Cells)...")
         self.brain = brain_ref

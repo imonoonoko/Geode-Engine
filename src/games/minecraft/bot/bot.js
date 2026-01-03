@@ -1,9 +1,9 @@
-// Mineflayer Bot for Geode-Engine AI
+// Mineflayer Bot for Kaname AI
 // ヘッドレス・バックグラウンド動作対応
 
 const mineflayer = require('mineflayer');
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
-const mineflayerViewer = require('prismarine-viewer').mineflayer; // Phase 15.6: Geode Vision
+const mineflayerViewer = require('prismarine-viewer').mineflayer; // Phase 15.6: Kaname Vision
 
 // HTTP API Server for Python communication
 const http = require('http');
@@ -27,7 +27,7 @@ function createBot(options) {
     const defaultOptions = {
         host: 'localhost',
         port: 25565,
-        username: 'GeodeAI',
+        username: 'KanameAI',
         version: '1.20.4'
     };
 
@@ -53,10 +53,10 @@ function createBot(options) {
         currentState.connected = true;
         updateState();
 
-        // Phase 15.6: Geode Vision (WebViewer)
+        // Phase 15.6: Kaname Vision (WebViewer)
         try {
             mineflayerViewer(bot, { port: 3007, firstPerson: true });
-            console.log('👀 Geode Vision Online! Open http://localhost:3007 to see what Geode sees.');
+            console.log('👀 Kaname Vision Online! Open http://localhost:3007 to see what Kaname sees.');
         } catch (err) {
             // Already running or port busy is common
             console.log(`⚠️ Viewer log: ${err.message}`);
@@ -235,13 +235,25 @@ function executeAction(action) {
                     return { success: true, status: 'started_digging', target: target.name };
                 }
                 return { success: false, error: 'No target to dig' };
+            case 'CHAT':
+                if (action.message) bot.chat(action.message);
+                break;
             case 'PLACE':
                 // Phase 11.2: Placing
                 const placeTarget = bot.blockAtCursor(5);
                 if (placeTarget && placeTarget.name !== 'air') {
-                    // 持っているアイテムがあるか確認 (簡易実装: 手持ちを使用)
-                    // TODO: インベントリからブロックを探して装備するロジック
-                    const heldItem = bot.inventory.slots[bot.getEquipmentDestSlot('hand')];
+                    // Check hand
+                    let heldItem = bot.inventory.slots[bot.getEquipmentDestSlot('hand')];
+
+                    // Phase 16: Auto-Equip block if empty
+                    if (!heldItem) {
+                        const blockItem = bot.inventory.items().find(i => bot.registry.blocksByName[i.name]);
+                        if (blockItem) {
+                            bot.equip(blockItem, 'hand').catch(e => console.log(`[EquipErr] ${e}`));
+                            heldItem = blockItem; // Optimistic
+                        }
+                    }
+
                     if (!heldItem) {
                         return { success: false, error: 'No item in hand' };
                     }
@@ -334,6 +346,6 @@ if (process.env.MC_HOST) {
     createBot({
         host: process.env.MC_HOST,
         port: process.env.MC_PORT || 25565,
-        username: process.env.MC_USERNAME || 'GeodeAI'
+        username: process.env.MC_USERNAME || 'KanameAI'
     });
 }

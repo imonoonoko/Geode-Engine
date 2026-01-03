@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # ==========================================
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MEMORY_DIR = os.path.join(BASE_DIR, "memory_data")
-TEMP_DIR = os.path.join(os.environ.get("TEMP", "."), "Geode_temp")
+TEMP_DIR = os.path.join(os.environ.get("TEMP", "."), "kaname_temp")
 
 # Load .env file (Explicit Path)
 load_dotenv(os.path.join(BASE_DIR, ".env"))
@@ -163,8 +163,8 @@ MC_PANIC_DISTANCE = 3.0             # パニックになる敵との距離
 # ==========================================
 # 🔥 Agni (Mentor) Settings (Phase 15.5)
 # ==========================================
-EDUCATION_MODE = False   # [GitHub Default: OFF] Set to True to enable Agni tutoring
-AGNI_HYPNOPEDIA = False  # [GitHub Default: OFF] Sleep Learning Mode
+EDUCATION_MODE = True
+AGNI_HYPNOPEDIA = True # Sleep Learning Mode (Hypnopedia)
 AGNI_SURPRISE_THRESHOLD = 0.3 # Gatekeeper: Ignore inputs with surprise < 0.3
 # 環境変数から読み込む。設定方法: $env:GEMINI_API_KEY = "your-key-here"
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
@@ -181,7 +181,7 @@ AGNI_PERSONA_ROTATION = ["Teacher", "Friend", "Rival", "Child"]
 # 1日24時間稼働の場合: 14400 / (24 * 60 * 60) = 0.16 req/sec
 # interval = 1 / 0.16 = 6.0秒
 MENTOR_AUTO_LOOP_INTERVAL = 6 # Seconds (RPD制限に基づく最適値)
-MENTOR_AUTO_TEACH = False # [GitHub Default: OFF] 自動教育
+MENTOR_AUTO_TEACH = True # 自動教育ON
 
 # Source Tags
 SOURCE_USER = "User"

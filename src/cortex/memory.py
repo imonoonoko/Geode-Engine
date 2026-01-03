@@ -92,22 +92,22 @@ class GeologicalMemory:
                 print(f"Memory Load Error: {e}")
                 report = "Memory Corrupted. Resetting."
         
-        # Ensure 'Geode' exists at the center (Self-Concept)
+        # Ensure 'Kaname' exists at the center (Self-Concept)
         center = self.size // 2
-        # Japanese Name "Geode"
-             # Japanese Name "Geode"
-        if "Geode" not in self.concepts:
+        # Japanese Name "カナメ"
+             # Japanese Name "カナメ"
+        if "カナメ" not in self.concepts:
              import src.dna.config as config
-             self.concepts["Geode"] = [center, center, time.time(), 9999, 1.0, config.SOURCE_USER]
+             self.concepts["カナメ"] = [center, center, time.time(), 9999, 1.0, config.SOURCE_USER]
         else:
              # Force recenter just in case
-             self.concepts["Geode"][0] = center
-             self.concepts["Geode"][1] = center
-             # Ensure format for Geode too
-             while len(self.concepts["Geode"]) < 6:
+             self.concepts["カナメ"][0] = center
+             self.concepts["カナメ"][1] = center
+             # Ensure format for Kaname too
+             while len(self.concepts["カナメ"]) < 6:
                  import src.dna.config as config
-                 if len(self.concepts["Geode"]) < 5: self.concepts["Geode"].append(0.0)
-                 else: self.concepts["Geode"].append(config.SOURCE_USER)
+                 if len(self.concepts["カナメ"]) < 5: self.concepts["カナメ"].append(0.0)
+                 else: self.concepts["カナメ"].append(config.SOURCE_USER)
              
         return report
 

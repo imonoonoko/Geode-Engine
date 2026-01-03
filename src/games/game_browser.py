@@ -129,7 +129,7 @@ class GameBrowser:
         """一時プロファイルディレクトリを取得"""
         import tempfile
         import os
-        return os.path.join(tempfile.gettempdir(), "Geode_game_browser")
+        return os.path.join(tempfile.gettempdir(), "kaname_game_browser")
     
     def stop(self):
         """ブラウザを停止"""

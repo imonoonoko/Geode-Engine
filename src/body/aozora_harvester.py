@@ -11,7 +11,7 @@ from typing import Optional
 class AozoraHarvester:
     """
     青空文庫から自動的に作品を取得
-    退屈時に Geode が自分で食料を探しに行く
+    退屈時に Kaname が自分で食料を探しに行く
     
     50+ 作品から選択可能
     """

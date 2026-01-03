@@ -49,7 +49,7 @@ class WikipediaHarvester:
         try:
             # ランダムページのタイトルを取得
             random_url = "https://ja.wikipedia.org/wiki/Special:Random"
-            req = urllib.request.Request(random_url, headers={'User-Agent': 'Geode/1.0'})
+            req = urllib.request.Request(random_url, headers={'User-Agent': 'Kaname/1.0'})
             
             with urllib.request.urlopen(req, timeout=10) as response:
                 final_url = response.geturl()
@@ -57,7 +57,7 @@ class WikipediaHarvester:
             
             # 記事の要約を取得
             summary_url = f"{self.api_url}/page/summary/{urllib.parse.quote(title)}"
-            req = urllib.request.Request(summary_url, headers={'User-Agent': 'Geode/1.0'})
+            req = urllib.request.Request(summary_url, headers={'User-Agent': 'Kaname/1.0'})
             
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = json.loads(response.read().decode('utf-8'))
@@ -92,7 +92,7 @@ class NHKNewsHarvester:
         try:
             req = urllib.request.Request(
                 self.api_url,
-                headers={'User-Agent': 'Geode/1.0'}
+                headers={'User-Agent': 'Kaname/1.0'}
             )
             
             with urllib.request.urlopen(req, timeout=10) as response:
@@ -181,7 +181,7 @@ class WeatherHarvester:
         try:
             req = urllib.request.Request(
                 self.api_url,
-                headers={'User-Agent': 'Geode/1.0'}
+                headers={'User-Agent': 'Kaname/1.0'}
             )
             
             with urllib.request.urlopen(req, timeout=10) as response:
@@ -229,7 +229,7 @@ class RSSHarvester:
             
             req = urllib.request.Request(
                 feed_url,
-                headers={'User-Agent': 'Geode/1.0'}
+                headers={'User-Agent': 'Kaname/1.0'}
             )
             
             with urllib.request.urlopen(req, timeout=10) as response:

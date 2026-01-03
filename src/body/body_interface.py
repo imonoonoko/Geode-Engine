@@ -53,7 +53,7 @@ class BodyHAL:
     
     def __init__(self, body_impl: Optional[BodyProtocol] = None):
         """
-        body_impl: BodyProtocol を満たす実装 (GeodeBodyなど)
+        body_impl: BodyProtocol を満たす実装 (KanameBodyなど)
         """
         self._body = body_impl
         self.brain_ref = None

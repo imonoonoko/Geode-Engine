@@ -18,9 +18,9 @@ except ImportError:
     MELO_AVAILABLE = False
     print("⚠️ MeloTTS not available")
 
-class GeodeThroat:
+class KanameThroat:
     def __init__(self, geo_memory=None):
-        print("🔊 Initializing Geode Throat...")
+        print("🔊 Initializing Kaname Throat...")
         self.memory = geo_memory
         self.is_active = True
         self.speech_queue = queue.Queue(maxsize=10) # Bounded (Anti-Babble)
@@ -88,7 +88,7 @@ class GeodeThroat:
             # 1. Generate Raw Audio
             # Speed is passed in via request (already scaled by caller based on Glucose/Mood)
             # Note: We can only check brain.chemicals if we have a reference. 
-            # In GeodeThroat.__init__, we only take geo_memory. 
+            # In KanameThroat.__init__, we only take geo_memory. 
             # We need to pass brain reference or accept glucose in speak().
             # speak() already adds request to queue. Let's start with standard speed in queue.
             
@@ -101,7 +101,7 @@ class GeodeThroat:
             # So the logic should be in main.py or body.py or passed here.
             # But let's look at the request: req["speed"] comes from speak().
             # We should modify speak() caller or modify here if we have access.
-            # GeodeThroat doesn't have self.brain. 
+            # KanameThroat doesn't have self.brain. 
             # Let's trust the 'speed' in req is correct, OR modify speak() to look up brain?
             # Easier: Modify body.py where it calls throat.speak, OR modify main.py.
             

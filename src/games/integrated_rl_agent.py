@@ -1,5 +1,5 @@
 # integrated_rl_agent.py
-# Game AI: Geode 統合型強化学習エージェント
+# Game AI: Kaname 統合型強化学習エージェント
 # GeologicalMemory, WorldModel, MetaLearner と連携
 
 import time
@@ -24,7 +24,7 @@ class GameExperience:
 
 class IntegratedRLAgent:
     """
-    Geode 統合型強化学習エージェント
+    Kaname 統合型強化学習エージェント
     
     - GeologicalMemory: ゲーム経験を地質学的に堆積
     - WorldModel: ゲーム状態を予測
@@ -41,7 +41,7 @@ class IntegratedRLAgent:
         """
         Args:
             action_size: アクション数
-            brain: Geode の Brain への参照
+            brain: Kaname の Brain への参照
             epsilon: 探索率（Curiosity）
             epsilon_min: 最小探索率
             epsilon_decay: 減衰
@@ -64,19 +64,19 @@ class IntegratedRLAgent:
         self.episode_count = 0
         self.prediction_errors: List[float] = []
         
-        # Geode システムへの参照
+        # Kaname システムへの参照
         self.meta_learner = None
         self.world_model = None
         self.memory = None
         
-        self._init_Geode_systems()
+        self._init_kaname_systems()
         
         print(f"🧠 Active Inference Agent Initialized.")
         print(f"   Actions: {action_size}, Curiosity: {epsilon:.2f}")
-        print(f"   Geode Integration: {'✅' if self.brain else '❌'}")
+        print(f"   Kaname Integration: {'✅' if self.brain else '❌'}")
     
-    def _init_Geode_systems(self):
-        """Geode システムへの参照を初期化"""
+    def _init_kaname_systems(self):
+        """Kaname システムへの参照を初期化"""
         if not self.brain:
             return
         
@@ -239,7 +239,7 @@ class IntegratedRLAgent:
             "type": "Active Inference (No RL)"
         }
         
-        # Geode システムの状態を追加
+        # Kaname システムの状態を追加
         if self.meta_learner:
             stats["meta_learning_rate"] = round(self.meta_learner.current_learning_rate, 4)
         if self.world_model:

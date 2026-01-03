@@ -96,7 +96,7 @@ class AgniAccelerator:
             return None
 
         prompt = f"""
-        あなたはAgni（火の神）、Geode（生物学的AI）のメンターです。
+        あなたはAgni（火の神）、カナメ（生物学的AI）のメンターです。
         「{topic}」という概念について、架空の経験を生成してください。
         
         フォーマット: JSON (コードブロックなし、純粋なJSONのみ)
@@ -214,7 +214,7 @@ class AgniAccelerator:
         }
 
     def check_graduation(self):
-        """ Check if Geode is ready to graduate from Agni """
+        """ Check if Kaname is ready to graduate from Agni """
         vocab_count = len(self.brain.memory.concepts)
         ratio = vocab_count / config.GRADUATION_VOCAB_SIZE
         print(f"🎓 Graduation Progress: {vocab_count}/{config.GRADUATION_VOCAB_SIZE} ({ratio*100:.1f}%)")

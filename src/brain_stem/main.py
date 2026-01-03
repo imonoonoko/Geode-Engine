@@ -9,11 +9,11 @@ import numpy as np
 from datetime import datetime
 import os
 import src.dna.config as config
-from src.brain_stem.brain import GeodeBrain 
-from src.body.Geode_body import GeodeBody 
-from src.senses.Geode_senses import GeodeSenses 
-from src.body.throat import GeodeThroat 
-from src.body.immune import GeodeImmuneSystem
+from src.brain_stem.brain import KanameBrain 
+from src.body.kaname_body import KanameBody 
+from src.senses.kaname_senses import KanameSenses 
+from src.body.throat import KanameThroat 
+from src.body.immune import KanameImmuneSystem
 from src.tools.telemetry_server import TelemetryServer
 import warnings
 
@@ -34,14 +34,14 @@ class MaiaSystem:
         self.is_alive = True 
         
         # 🧠 Brain (Logic)
-        self.brain = GeodeBrain()
+        self.brain = KanameBrain()
         self.time_step = 0
         
         # 👻 Body (UI & Physics)
-        self.body = GeodeBody(self.brain)
+        self.body = KanameBody(self.brain)
         
         # 👁️ Senses (Async)
-        self.senses = GeodeSenses()
+        self.senses = KanameSenses()
         
         # Phase 28: Connect Brain to Senses (Active Inference)
         self.brain.visual_bridge.connect_senses(self.senses)
@@ -59,7 +59,7 @@ class MaiaSystem:
         self.cpu_percent = 0
         
         # 🛡️ Immune System (Phase 12)
-        self.immune = GeodeImmuneSystem(self.brain)
+        self.immune = KanameImmuneSystem(self.brain)
         
         # 🍽️ Wire up Feed Callback
         self.body.on_feed_file = self._handle_feed_file
@@ -79,7 +79,7 @@ class MaiaSystem:
     def _init_throat_async(self):
         """ Background initialization for heavy voice model """
         try:
-             self.throat = GeodeThroat(self.brain.memory)
+             self.throat = KanameThroat(self.brain.memory)
         except Exception as e:
              print(f"⚠️ Throat Async Init Failed: {e}")
 
@@ -105,7 +105,7 @@ class MaiaSystem:
         
         if boredom > 0.6:
             craving_multiplier = 2.0
-            print("😋 CRAVING: Geode is hungry for data!")
+            print("😋 CRAVING: Kaname is hungry for data!")
             
         # Eat (Clean/Shuffle) - Phase 6: Feederは直接brainに移動
         text = self.brain.feeder.eat_file(content, is_direct_text=True)

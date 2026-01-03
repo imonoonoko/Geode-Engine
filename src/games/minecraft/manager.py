@@ -92,7 +92,7 @@ class MinecraftManager:
         await self._subscribe_events(websocket)
         
         # 2. TEST COMMAND: Say hello to verify output
-        await self.send_command(websocket, "say 🔗 Geode-Engine AI System Linked. Protocol Debugging Mode.")
+        await self.send_command(websocket, "say 🔗 Kaname AI System Linked. Protocol Debugging Mode.")
         
         # 3. Command & Event Loop
         try:

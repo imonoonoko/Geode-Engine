@@ -28,7 +28,7 @@ class MaiaTranslator:
         data = ""
         
         # 1. Base Corpus (Personality)
-        corpus_path = os.path.join(config.BASE_DIR, "docs", "Geode_corpus.txt")
+        corpus_path = os.path.join(config.BASE_DIR, "docs", "kaname_corpus.txt")
         if os.path.exists(corpus_path):
              with open(corpus_path, "r", encoding="utf-8") as f:
                  data += f.read() + "\n"

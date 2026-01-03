@@ -7,18 +7,18 @@ class MinecraftBrain:
     🎮 Game Brain (Minecraft Cortex)
     
     役割:
-    - GeodeBrain (本体) から「ホルモン」「記憶」「意図」を受け取る。
+    - KanameBrain (本体) から「ホルモン」「記憶」「意図」を受け取る。
     - Minecraft固有の環境情報 (State) を分析する。
     - 具体的な行動 (DIG, PLACE, ATTACK, MOVE) を決定する。
     
     Design:
-    - 本体 (GeodeBrain) は汎用的な生命維持装置。
+    - 本体 (KanameBrain) は汎用的な生命維持装置。
     - このGameBrainは「Minecraftの身体を動かすための小脳/運動野」。
     - 記憶は本体の `brain.memory` を共有・更新する。
     """
     
     def __init__(self, brain_core):
-        self.brain = brain_core # Reference to GeodeBrain
+        self.brain = brain_core # Reference to KanameBrain
         print("🎮 Minecraft Brain Connected to Core.")
 
     def decide_intent(self, state):
@@ -54,23 +54,27 @@ class MinecraftBrain:
             "DIG": 0.0,
             "PLACE": 0.0, # Phase 11.2
             "ATTACK": 0.0,
+            "CHAT": 0.05, # Phase 16: Chat capability
             "WAIT": 0.1
         }
         
         # --- Bias Injection (Game Logic) ---
         
         # 退屈 (Boredom) triggers Creativity or Destruction
-        if boredom > 15.0:
+        if boredom > 10.0: # Tuned down from 15.0 for Phase 16
             # 創造的衝動 (Dopamine > 40) -> PLACE
             if dopamine > 40.0:
-                action_weights["PLACE"] += (boredom - 15.0) * 0.1
+                action_weights["PLACE"] += (boredom - 10.0) * 0.15
                 action_weights["WAIT"] += 0.2 # じっくり考える
             # 破壊的衝動 (Dopamine Low) -> DIG
             else:
-                 action_weights["DIG"] += (boredom - 15.0) * 0.1
+                 action_weights["DIG"] += (boredom - 10.0) * 0.15
                  action_weights["TURN_LEFT"] += 0.2
                  action_weights["TURN_RIGHT"] += 0.2
             
+            # Chat Bias (Social)
+            action_weights["CHAT"] += 0.1
+
         # 恐怖 (Cortisol) -> 攻撃/逃走 (Fight or Flight)
         # Phase 11.3: FEP-based Combat Logic
         # 予測誤差(痛み=Cortisol)を最小化するための能動的推論
@@ -131,7 +135,7 @@ class MinecraftBrain:
             
             # PLACE: 何かブロックがあれば、その上に置くチャンス
             if "air" not in cursor["name"]:
-                 if boredom > 15.0 and dopamine > 40.0:
+                 if boredom > 10.0 and dopamine > 40.0:
                       action_weights["PLACE"] += 0.6
                       
             # 硬すぎるものは掘らない
@@ -144,6 +148,11 @@ class MinecraftBrain:
         
         final_intent = random.choices(actions, weights=weights, k=1)[0]
         
+        # Phase 16: Handle CHAT intent payload
+        if final_intent == "CHAT":
+            msg = self._generate_chat_message(state, boredom, dopamine)
+            return {"type": "CHAT", "message": msg}
+
         # ログは確率で出す (GameBrain独自の思考ログ)
         if random.random() < 0.05:
             print(f"🎮 [GameBrain] Intent: {final_intent} (B:{boredom:.1f} C:{cortisol:.1f})")
@@ -153,6 +162,28 @@ class MinecraftBrain:
             return self._decide_movement_from_memory(state)
             
         return final_intent
+
+    def _generate_chat_message(self, state, boredom, dopamine):
+        """簡単なチャット生成 (Phase 16)"""
+        # TODO: Connect to Ollama/Agni for generative text
+        
+        msgs = ["..."]
+        
+        if dopamine > 60:
+            msgs = ["わーい！", "楽しいな", "何か作りたい！", "冒険だ！", "hello world!"]
+        elif boredom > 30:
+            msgs = ["暇だなあ...", "何かおきないかな", "眠い...", "I'm bored.", "walking..."]
+        elif state and state.get("nearestMob"):
+            mob = state["nearestMob"]["name"]
+            msgs = [f"あ、{mob}だ！", f"{mob}がいる...", "怖い？"]
+        else:
+            block = state.get("cursor", {}).get("name", "air")
+            if block != "air":
+                 msgs = [f"これは{block}？", "ふむふむ", "掘ってみようかな"]
+            else:
+                 msgs = ["広いなあ", "どこ行こう？", "お腹すいたかも"]
+                 
+        return random.choice(msgs)
 
     def _decide_movement_from_memory(self, state):
         """本体の記憶(Memory)を参照して移動方向を決める"""

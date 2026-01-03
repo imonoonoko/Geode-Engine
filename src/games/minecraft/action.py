@@ -20,7 +20,7 @@ except:
 
 class MinecraftActionModule:
     """
-    The Hands & Feet of Geode for Minecraft.
+    The Hands & Feet of Kaname for Minecraft.
     Uses PyAutoGUI to simulate physical inputs.
     
     SAFETY FIRST:

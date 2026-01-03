@@ -99,7 +99,7 @@ class MineflayerEnv:
         print("🛑 Bot server stopped.")
     
     def connect(self, host: str = "localhost", port: int = 25565, 
-                username: str = "GeodeAI") -> bool:
+                username: str = "KanameAI") -> bool:
         """
         MinecraftサーバーにBotを接続。
         
@@ -253,10 +253,14 @@ class MineflayerEnv:
         else:
             self.brain.hormones.update(Hormone.CORTISOL, abs(reward) * 10)
     
-    def create_action(self, intent: str, **kwargs) -> Dict[str, Any]:
+    def create_action(self, intent, **kwargs) -> Dict[str, Any]:
         """意図をアクションに変換"""
-        action = {"type": intent}
-        if "duration" in kwargs:
+        if isinstance(intent, dict):
+            action = intent.copy()
+        else:
+            action = {"type": intent}
+            
+        if "duration" in kwargs and "duration" not in action:
             action["duration"] = int(kwargs["duration"] * 1000)  # 秒→ミリ秒
         return action
     

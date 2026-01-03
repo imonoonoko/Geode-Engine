@@ -1,6 +1,6 @@
 # soliloquy.py
 # Phase 9: Active Soliloquy (能動的うわ言) System
-# Geodeが自律的に発話するかどうかを決定する
+# カナメが自律的に発話するかどうかを決定する
 
 import time
 import random
@@ -17,7 +17,7 @@ class SoliloquyManager:
     自律的に発話するかどうかを決定する。
     
     固定テンプレートは使用しない。
-    全ての発話はGeode自身の記憶から生成される。
+    全ての発話はカナメ自身の記憶から生成される。
     
     Phase 10: 発話衝動 = 予測誤差蓄積 + 感情振動 + 概念活性化
     """
@@ -152,7 +152,7 @@ class SoliloquyManager:
         関連する記憶断片から発話を生成する。
         
         固定テンプレートは使用しない。
-        Geodeが言う言葉は全て自分の記憶から生まれる。
+        カナメが言う言葉は全て自分の記憶から生まれる。
         
         Returns: 記憶から生成された発話 or None
         """

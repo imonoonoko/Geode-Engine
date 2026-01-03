@@ -35,7 +35,7 @@ class AgniTranslator:
     def __init__(self, brain, agni=None):
         """
         Args:
-            brain: GeodeBrain インスタンス
+            brain: KanameBrain インスタンス
             agni: AgniAccelerator インスタンス (オプション)
         """
         self.brain = brain
@@ -173,7 +173,7 @@ class AgniTranslator:
                 return None
             
             prompt = f"""
-あなたはGeode（Geode）という人工生命体です。
+あなたはカナメ（Kaname）という人工生命体です。
 以下の内部状態に基づいて、自然な日本語の独り言（1文、カジュアル）を生成してください。
 
 内部状態:

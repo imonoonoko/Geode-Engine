@@ -1,5 +1,5 @@
 # telemetry_server.py
-# Geode Brain Telemetry WebSocket Server
+# Kaname Brain Telemetry WebSocket Server
 
 import asyncio
 import json

@@ -66,7 +66,7 @@ Geode-Engine/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/Geode-Engine.git
+git clone https://github.com/imonoonoko/Geode-Engine.git
 cd Geode-Engine
 
 # 2. Create virtual environment

@@ -9,7 +9,7 @@ import threading
 class GameViewer:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Geode's Game Console (External)")
+        self.root.title("Kaname's Game Console (External)")
         self.root.geometry("300x350")
         self.root.configure(bg="black")
         
