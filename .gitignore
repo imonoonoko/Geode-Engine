@@ -1,0 +1,35 @@
+# Geode-Engine - Geological Memory AI
+
+# Dependencies
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# Data (contains personal memories)
+memory_data/
+*.pkl
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# Cache
+.pytest_cache/
+.mypy_cache/
+
+# Logs
+*.log
+
+# Archives
+archived_prototypes/
+
+# OS
+.DS_Store
+Thumbs.db

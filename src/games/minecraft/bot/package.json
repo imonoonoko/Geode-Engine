@@ -1,0 +1,12 @@
+{
+  "name": "Geode-minecraft-bot",
+  "version": "1.0.0",
+  "description": "Mineflayer bot for Geode-Engine AI",
+  "main": "bot.js",
+  "dependencies": {
+    "canvas": "^3.2.0",
+    "mineflayer": "^4.17.0",
+    "mineflayer-pathfinder": "^2.4.0",
+    "prismarine-viewer": "^1.33.0"
+  }
+}
