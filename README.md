@@ -3,7 +3,10 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Geological Memory AI** — An experimental artificial life simulation inspired by brain science and geology.
+**Geological Memory AI** — An experimental artificial life simulation inspired by neuroscience and geology.
+
+> [!WARNING]
+> **Work in Progress**: This project is an early-stage experimental prototype and is still far from its ultimate goal of a fully autonomous digital lifeform. Many features are incomplete, and breaking changes are expected.
 
 [日本語 README はこちら](README_ja.md)
 
