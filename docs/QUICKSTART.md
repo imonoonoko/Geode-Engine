@@ -41,7 +41,7 @@ python src/brain_stem/main.py
 ### 5. (Optional) Minecraft Integration
 
 ```bash
-cd src/games/minecraft
+cd src/games/minecraft/bot
 npm install
 node bot.js
 ```
@@ -89,7 +89,7 @@ python src/brain_stem/main.py
 ### 5. （オプション）Minecraft統合
 
 ```bash
-cd src/games/minecraft
+cd src/games/minecraft/bot
 npm install
 node bot.js
 ```
