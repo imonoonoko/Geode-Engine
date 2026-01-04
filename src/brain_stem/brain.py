@@ -10,10 +10,14 @@ import queue
 # [Anatomical Imports]
 import src.dna.config as config
 from src.cortex.memory import GeologicalMemory
+from src.cortex.knowledge_graph import KnowledgeGraph
+from src.cortex.logic import LogicEngine
+from src.cortex.knowledge_importer import KnowledgeImporter
 from src.cortex.sedimentary import SedimentaryCortex
 from src.body.maya_resonance import GeologicalResonance
 from src.body.biorhythm import BioRhythm
 from src.cortex.inference import PredictionEngine
+from src.cortex.tazuna import Tazuna # Step 4: Meta-Cognition Engine
 from src.body.hormones import Hormone, HormoneManager  # Phase 8: Global import for all methods
 
 # [Extracted Cells & Bridges]
@@ -23,8 +27,10 @@ from src.senses.mentor import AgniAccelerator # Phase 15.5
 from src.brain_stem.motor_cortex import MotorCortex  # Phase 15.1
 from src.brain_stem.sensory_cortex import SensoryCortex  # Phase 15.2
 from src.brain_stem.dream_engine import DreamEngine  # Phase 15.3
-from src.body.metabolism import MetabolismManager  # Phase 15.4
+from src.body.metabolism import MetabolismManager  # Phase 15.4 & 31
+from src.cortex.spatial import SpatialCortex # Phase 31
 from src.cortex.agni_translator import AgniTranslator  # Phase 16
+from src.cortex.hdc_bridge import HDCBridge  # Phase 19
 
 # [Body Interface]
 try:
@@ -49,6 +55,7 @@ class KanameBrain:
         self.hormones = HormoneManager()
         
         # Phase 20: 隠蔽された疲労 (Bravado System)
+        # Phase 31: Managed by MetabolismManager, but Brain needs a stub for backward compat
         self.hidden_fatigue = 0.0
 
         # ... (lines 73-136 omitted)
@@ -58,6 +65,9 @@ class KanameBrain:
         self.memory = GeologicalMemory(size=config.MSG_BRAIN_SIZE)
         print(self.memory.load()) 
         self.cortex = SedimentaryCortex(self.memory, max_sediments=config.SEDIMENT_MAX)
+        
+        # New: Tazuna Engine (Meta-Cognition)
+        self.tazuna = Tazuna()
         
         # 3. 海馬 (Deep Semantic Memory) [Phase 6]
         from src.cortex.hippocampus import Hippocampus
@@ -74,9 +84,12 @@ class KanameBrain:
         # Phase 30: 感情→学習接続 (Inject Brain Reference)
         self.cortex.stomach.brain_ref = self
         
-        # 5. 声帯翻訳機 (Translator) [Phase 5 -> Phase 6: 削除]
-        # Phase 6: LLMを使わずに記憶断片を直接結合する
-        self.translator = None  # Disabled for No-LLM policy
+        # Phase 16: Hybrid Translator (Ollama + Agni Distillation)
+        # Re-enabled for high-level language generation
+        self.translator = AgniTranslator(self)
+        
+        # Phase 19: HDCBridge (Memory Recall + G-Calculation + Prompt Injection)
+        self.hdc_bridge = HDCBridge(self)
         
         # Phase 6: Feederは独立させる (main.pyからアクセスするため)
         from src.body.feeder import DataFeeder
@@ -108,13 +121,15 @@ class KanameBrain:
         self.personality_field = PersonalityField()
         
         # Phase 7: Minecraft Integration (Environment Body)
-        try:
-            from src.games.minecraft.manager import MinecraftManager
-            self.minecraft = MinecraftManager(brain=self)
-            self.minecraft.start() # Start WebSocket Server immediately
-        except ImportError:
-            # print("⚠️ Minecraft dependencies missing (websockets).")
-            self.minecraft = None
+        # --> MOVED/DISABLED (Java Edition Used)
+        # try:
+        #     from src.games.minecraft.manager import MinecraftManager
+        #     self.minecraft = MinecraftManager(brain=self)
+        #     self.minecraft.start() # Start WebSocket Server immediately
+        # except ImportError:
+        #     # print("⚠️ Minecraft dependencies missing (websockets).")
+        #     self.minecraft = None
+        self.minecraft = None
 
         if self.minecraft:
             try:
@@ -135,7 +150,8 @@ class KanameBrain:
         self.is_drowsy = False
         self.is_sleeping = False
         self.inactive_counter = 0
-        self.current_geo_y = config.BRAIN_GEO_INITIAL
+        # Phase 31: Spatial Cortex handles Geo-Y
+        # self.current_geo_y = config.BRAIN_GEO_INITIAL (Delegated to Spatial)
         
         # Throttle for Environment Resonance (Prevent Spamming)
         self._last_env_resonance_concept = None
@@ -146,20 +162,10 @@ class KanameBrain:
         self.prediction_engine.brain_ref = self  # Phase 30: 感情バイアス予測用
         
         # Phase 2.2: Metamorphism (Inject Engine into Cortex)
-        if self.cortex:
-            self.cortex.prediction_engine = self.prediction_engine
+        # Moved to end of __init__ to ensure spatial is ready
 
-        self.homeostatic_set_points = {
-            "dopamine": 30.0,   # 少なめ（意欲飢餓）
-            "adrenaline": 20.0, # 落ち着いている
-            "serotonin": 50.0,  # 安定
-            "oxytocin": 40.0,   # 孤独を感じやすい
-            "cortisol": 0.0,   # ストレスフリー
-            "boredom": 0.0,
-            "stimulation": 50.0,
-            "glucose": 50.0,   # 基準血糖値
-            "surprise": 0.0    # New: Free Energy
-        }
+        # Phase 31: Moved to MetabolismManager
+        # self.homeostatic_set_points = { ... }
         
         # Phase 25: Action Strategy (SSM-driven)
         self.current_action_strategy = "RESONATE"
@@ -167,6 +173,11 @@ class KanameBrain:
         # Missing Initializations (Demon Audit Phase 21)
         self.last_thought_time = time.time()
         self.speech_queue = queue.Queue(maxsize=10)
+        
+        # Phase 2: Tazuna Learning Memory
+        self.last_dopamine = 0.0
+        self.last_tazuna_hormones = None # Snapshot for learning
+        self.last_tazuna_signal = None
 
         # Phase 8 Step 3: Event-Driven Architecture
         from src.body.events import EventBus, Event
@@ -225,17 +236,53 @@ class KanameBrain:
         )
         
         # Phase 15.4: Metabolism Manager (Separated Module)
+        # Phase 15.4 & 31: Metabolism Manager (Refactored)
         self.metabolism_manager = MetabolismManager(
             hormones=self.hormones,
-            memory=self.memory
+            memory=self.memory,
+            bio_engine=self.bio_engine
         )
+        # Phase 31: Spatial Cortex
+        self.spatial = SpatialCortex(self)
         
         # Phase 16: Agni Translator (壁2攻略)
         self.translator = AgniTranslator(
             brain=self,
             agni=self.mentor
         )
+
+        # Phase 30: Removed (Consolidated into Phase 12 below)
+        
+        # Phase 3: Activity & Lesson (Full Integration)
+        from src.cortex.lesson_room import LessonRoom
+        self.lesson_room = LessonRoom(self)
+        
+        from src.brain_stem.activity_manager import ActivityManager
+        self.activity_manager = ActivityManager(self)
+
+        # Phase 2.2: Metamorphism (Inject Engine into Cortex) - Moved here
+        if self.spatial:
+            self.spatial.prediction_engine = self.prediction_engine
+
+        # Phase 12: Advanced Reasoning (Common Sense)
+        self.knowledge_graph = KnowledgeGraph(save_dir=self.memory.save_dir)
+        self.logic_engine = LogicEngine(self)
+        self.logic_engine.graph = self.knowledge_graph
+        
+        # Async Auto-Import
+        def _auto_import():
+             importer = KnowledgeImporter(self.knowledge_graph)
+             importer.import_from_directory() # defaults to data/learning
+        threading.Thread(target=_auto_import, daemon=True).start()
     
+    @property
+    def current_geo_y(self):
+        return self.spatial.current_geo_y
+    
+    @current_geo_y.setter
+    def current_geo_y(self, val):
+        self.spatial.current_geo_y = val
+
     def _register_event_handlers(self):
         """
         イベントハンドラを登録。
@@ -361,45 +408,9 @@ class KanameBrain:
                     if random.random() < 0.1:
                         self.hormones.update(Hormone.DOPAMINE, 5.0)
 
-            # Phase 7: Minecraft Integration (FIXED: Out of photosynthesis check)
+            # Phase 7: Minecraft Integration (Refactored to SpatialCortex)
             if sense_type == "MC_TRAVEL":
-                # DEBUG: 座標受信を記録
-                print(f"📍 [BRAIN] Processing MC_TRAVEL sense...")
-                
-                # 行動誘発
-                self._process_minecraft_sense(sense_data)
-                
-                # 探索による報酬
-                self.hormones.update(Hormone.DOPAMINE, 0.5)
-                self.hormones.update(Hormone.GLUCOSE, -0.2)
-                self.hormones.update(Hormone.BOREDOM, -1.0)
-                
-                # Phase 6: Epigenetic Reinforcement (Vision)
-                if 'concept' in sense_data:
-                    target = sense_data['geo_target']
-                    
-                    if target == 'Valley':
-                        self.memory.reinforce(target, -0.1) # 嫌な場所
-                    elif gain > 0:
-                        self.memory.reinforce(target, +0.05) 
-
-                    # Throttle: Only resonate if concept changed
-                    if target != self._last_env_resonance_concept:
-                        self.hormones.update(Hormone.STIMULATION, 20.0) # Phase 22
-                        self._last_env_resonance_concept = target
-                        
-                        if target == 'South':
-                            self.current_geo_y = min(config.BRAIN_GEO_MAX, self.current_geo_y + 50)
-                            self.resonance.drift_impact("Hot")
-                        elif target == 'North':
-                            self.current_geo_y = max(config.BRAIN_GEO_MIN, self.current_geo_y - 50)
-                            self.resonance.drift_impact("Cold")
-                        elif target == 'North_High':
-                            self.current_geo_y = 200
-                            self.resonance.drift_impact("Intellect")
-                        elif target == 'Valley':
-                            self.hormones.update(Hormone.SEROTONIN, -0.05)
-                            self.resonance.drift_impact("Fear")
+                self.spatial.process_sense(sense_data)
 
         # Phase 7: Minecraft keeps the brain awake
         if "MC_" in str(sense_data): # Check if it's a Minecraft event
@@ -533,7 +544,43 @@ class KanameBrain:
                     self.visual_bridge.set_expectation(word)
                 
                 # 4. Execute Cortex Retrieval
-                ir_data = self.cortex.speak(word, strategy=strategy)
+                
+                # Phase 2: Tazuna Learning Step `(Reward Calculation)`
+                current_dopamine = self.hormones.get(Hormone.DOPAMINE)
+                delta_dopamine = current_dopamine - self.last_dopamine
+                
+                if self.last_tazuna_hormones and self.last_tazuna_signal:
+                    # Previous Action Resulted in this Delta?
+                    # We learn if the delta is significant
+                    self.tazuna.learn(self.last_tazuna_hormones, self.last_tazuna_signal.mode, delta_dopamine)
+
+                # Execute Modulation
+                tazuna_signal = self.tazuna.modulate(self.hormones)
+                
+                # Store State for Next Learning Step
+                self.last_dopamine = current_dopamine
+                self.last_tazuna_hormones = self.hormones.as_dict() # Snapshot
+                self.last_tazuna_signal = tazuna_signal
+                
+                # Log Tazuna State
+                if tazuna_signal.mode != "NORMAL":
+                     icon = "🎲" if tazuna_signal.mode == "DIVERGE" else "🎯"
+                     if tazuna_signal.mode == "PANIC": icon = "🛡️"
+                     
+                     # Determine trigger for log
+                     trigger = "SEROTONIN"
+                     val = self.hormones.get(Hormone.SEROTONIN)
+                     if tazuna_signal.mode == "DIVERGE":
+                         trigger = "BOREDOM"
+                         val = self.hormones.get(Hormone.BOREDOM)
+                     elif tazuna_signal.mode == "PANIC":
+                         trigger = "SURPRISE"
+                         val = self.hormones.get(Hormone.SURPRISE)
+                         
+                     print(f"🐎 [Tazuna] {icon} {tazuna_signal.mode} (Temp: {tazuna_signal.temperature:.1f}) | {trigger}: {val:.1f}%")
+                     print(f"   └─ Why: \"{tazuna_signal.reason}\"")
+                
+                ir_data = self.cortex.speak(word, strategy=strategy, tazuna_signal=tazuna_signal)
                 
                 if ir_data: 
                     # Inject Strategy into Packet for Translator
@@ -612,7 +659,14 @@ class KanameBrain:
                 if self.time_step % 50 == 0:
                     print(f"🤖 [AUTO] Autonomous MC action: ({mx:.1f}, {mz:.1f})")
                 self._decide_minecraft_action(mx, mz)
-                
+        
+        # [Phase 17] Tiered Memory Pruning
+        # 眠っている間に短期記憶(RAM)を整理し、長期記憶(SQLite)へ溢れた分を戻す
+        if self.time_step % 200 == 0:
+             if hasattr(self, 'knowledge_graph'):
+                 # Keep 500k active concepts (~1GB RAM). The rest reside in SQLite.
+                 self.knowledge_graph.prune(limit=500000)
+
         # 1. 勾配降下法 (Gradient Following)
         result = self.memory.forget_forgotten_concepts()
         forgotten, composted_valence = result if isinstance(result, tuple) else (result, 0.0)
@@ -748,8 +802,8 @@ class KanameBrain:
                          self.mentor.set_persona(new_persona)
 
                     # [Diversity Fix]: If memory is empty or stuck on "Kaname", inject fresh concepts
-                    if not seed or seed == "Kaname" or seed == "カナメ":
-                         fallback_seeds = ["世界", "時間", "命", "心", "夢", "星", "海", "AI", "人間"]
+                    if not seed or seed == "Kaname" or seed == "カナメ" or seed == "User" or seed == "AI" or len(seed) < 2:
+                         fallback_seeds = ["世界", "時間", "命", "心", "夢", "星", "海", "人間", "記憶", "言葉"]
                          seed = random.choice(fallback_seeds)
 
                     if seed:
@@ -845,6 +899,32 @@ class KanameBrain:
              if len(self.neurons) > 1000:
                  self.prune_neurons()
 
+             # === Phase 30: Advanced Reasoning Loop (Common Sense) ===
+             # Think about the input using the Knowledge Graph
+             if hasattr(self, 'logic'):
+                 thought = self.logic.ponder(text)
+                 
+                 # Activate the decided concept (Associative Priming)
+                 if thought['decision']:
+                     dec = thought['decision']
+                     self.activate_concept(dec['name'], boost=0.5)
+                     
+                     # --- 🧠 THOUGHT STREAM (Visual Debugger) ---
+                     import datetime
+                     print("\n" + "="*60)
+                     print(f"🧠 THOUGHT STREAM | {datetime.datetime.now().strftime('%H:%M:%S')} | Strategy: {thought['strategy']}")
+                     print("="*60)
+                     print(f"Input: \"{text}\"")
+                     print("-" * 60)
+                     print(f"Anchor: {thought['anchor']}")
+                     print("Candidates:")
+                     for c in thought['candidates']:
+                         mark = "★" if c == thought['decision'] else " "
+                         print(f"  {mark} {c['concept']} ({c['relation']}) ... Surprise: {c['sim_surprise']:.2f}")
+                     print("-" * 60)
+                     print(f"Decision: {dec['name']}")
+                     print("="*60 + "\n")
+
         # Resonance for Input (Impact) - Outside Lock
         self.resonance.impact(text, force=1.0)
         
@@ -868,7 +948,111 @@ class KanameBrain:
                         # 一時的に少し幸せになるか、悲しくなるかは記憶次第だが、ここでは「共鳴した」事実をDopamineとする
                         self.hormones.update(Hormone.DOPAMINE, 5.0)
 
+        # === Phase 18: Direct Conversation Response (Chat Mode) ===
+        # ユーザー入力に対して、直接レスポンスを生成するタスクを開始
+        # Blockingを防ぐため別スレッドで実行
+        threading.Thread(target=self._process_conversation, args=(text,), daemon=True).start()
 
+    def _process_conversation(self, text: str):
+        """
+        Phase 18: Direct Response to User Input.
+        Phase 19: Uses HDCBridge for memory injection.
+        Runs in a background thread to avoid blocking.
+        """
+        try:
+            # 1. Process through HDCBridge (Recall + G-Calc + Prompt Build)
+            if hasattr(self, 'hdc_bridge') and self.hdc_bridge:
+                bridge_result = self.hdc_bridge.process(text)
+                reasoning_context = bridge_result.get("prompt", "")
+            else:
+                # Fallback to LogicEngine
+                reasoning_context = ""
+                if hasattr(self, 'logic_engine'):
+                    thought_stream = self.logic_engine.ponder(text)
+                    if thought_stream and thought_stream.get("decision"):
+                        reasoning_context = self.logic_engine.get_context_prompt(thought_stream)
+            
+            # 2. Generate Response (AgniTranslator)
+            if hasattr(self, 'translator') and self.translator:
+                response_text = self.translator.generate_response(text, reasoning_context)
+                
+                if response_text:
+                    # 3. Queue Speech
+                    payload = {
+                        "text": response_text,
+                        "focus": "User Input",
+                        "context": reasoning_context[:50] + "..." if reasoning_context else "Conversation",
+                        "instability": 0.0
+                    }
+                    self.speech_queue.put(payload)
+                    
+                    # 会話が成立したので満足
+                    self.hormones.update(Hormone.DOPAMINE, 10.0)
+                    self.hormones.update(Hormone.SEROTONIN, 5.0)
+                    
+        except Exception as e:
+            print(f"⚠️ Conversation Error: {e}")
+
+    def _autonomous_speak(self):
+        """
+        Phase 19: Autonomous LLM Conversation.
+        When bored or stimulated, generate self-directed speech using HDCBridge + Ollama.
+        This allows Kaname to 'think aloud' intelligently and grow through internal dialogue.
+        """
+        try:
+            # 1. Pick a random concept from memory as a conversation seed
+            seed_word = self.memory.get_random_concept(refresh=True)
+            if not seed_word or len(seed_word) < 2:
+                return
+            
+            # 2. Construct an internal prompt (self-reflection)
+            internal_prompts = [
+                f"「{seed_word}」について思うこと…",
+                f"最近{seed_word}のこと考えてた…",
+                f"{seed_word}って何だろう？",
+                f"ふと{seed_word}を思い出した…",
+                f"{seed_word}…なんか気になる"
+            ]
+            prompt = random.choice(internal_prompts)
+            
+            # 3. Process through HDCBridge for memory injection
+            if hasattr(self, 'hdc_bridge') and self.hdc_bridge:
+                bridge_result = self.hdc_bridge.process(prompt)
+                context = bridge_result.get("prompt", "")
+                action = bridge_result.get("action", "speak")
+                
+                # Only speak if G-calc favors it
+                if action != "speak":
+                    print(f"🤫 [Autonomous] G-calc chose '{action}' - staying quiet.")
+                    return
+            else:
+                context = prompt
+            
+            # 4. Generate response using Ollama
+            if hasattr(self, 'translator') and self.translator:
+                response_text = self.translator.generate_response(prompt, context)
+                
+                if response_text and len(response_text) > 3:
+                    # Clean output
+                    response_text = response_text.strip()[:100]  # Limit length
+                    
+                    # 5. Queue for speech bubble
+                    payload = {
+                        "text": response_text,
+                        "focus": seed_word,
+                        "context": "Autonomous Thought",
+                        "instability": 0.1
+                    }
+                    self.speech_queue.put(payload)
+                    
+                    # 6. Learn from self-reflection
+                    self.hormones.update(Hormone.DOPAMINE, 3.0)  # Small satisfaction
+                    self.hormones.update(Hormone.STIMULATION, 10.0)  # Reduce boredom
+                    
+                    print(f"💬 [Autonomous] Spoke about '{seed_word}': {response_text[:30]}...")
+                    
+        except Exception as e:
+            print(f"⚠️ [Autonomous] Error: {e}")
     def save_memory(self, async_mode=True):
         """ 
         Run memory/cortex save.
@@ -912,144 +1096,9 @@ class KanameBrain:
             print("✅ Save Complete.")
 
     def process_metabolism(self, cpu_percent, memory_percent, current_hour):
-        """ 生理代謝の更新 (Thread Safe with Lock) """
-
-        with self.lock:
-            # 1. 基礎代謝 (Base Metabolism)
-            # Living costs energy.
-            self.hormones.update(Hormone.GLUCOSE, -0.01)
-            
-            # 2. 活動代謝 (Neuro-Consumption) based on Adrenaline/Computing
-            adrenaline = self.hormones.get(Hormone.ADRENALINE)
-            burn_rate = 0.01 + (adrenaline * 0.0005) 
-            # 確率的ゆらぎ (Metabolic Noise)
-            if random.random() < 0.2:
-                burn_rate *= 1.5 
-            
-            self.hormones.update(Hormone.GLUCOSE, -burn_rate)
-
-            # 3. 疲労の蓄積と隠蔽 (Bravado)
-            # 低血糖時は無理をする(Dopamine高)と、隠れ疲労が溜まる
-            glucose = self.hormones.get(Hormone.GLUCOSE)
-            dopamine = self.hormones.get(Hormone.DOPAMINE)
-            
-            if glucose < config.THRESHOLD_LOW and dopamine > config.THRESHOLD_HIGH:
-                self.hidden_fatigue += 0.5
-            else:
-                self.hidden_fatigue = max(0.0, self.hidden_fatigue - 0.1)
-
-            # Phase 22: 退屈と刺激 (Boredom Metabolism) - 0-100 scale
-            # Stimulation decays over time
-            self.hormones.update(Hormone.STIMULATION, -0.5)
-            stimulation = self.hormones.get(Hormone.STIMULATION)
-            
-            if stimulation < 30.0:
-                # 刺激がないと退屈する
-                self.hormones.update(Hormone.BOREDOM, 0.5)
-            elif stimulation > config.THRESHOLD_HIGH:
-                # 刺激があれば退屈しない
-                self.hormones.update(Hormone.BOREDOM, -2.0)
-
-            # 4. ホメオスタシス & バイオリズム (Humanized Logic)
-            circadian_factor = self.bio_engine.get_circadian_factor(current_hour)
-            
-            # Phase 6 DEF-05: 半減期に基づくホルモン減衰
-            # HormoneManager has generic update, but we need specific Half-life logic.
-            # We must use 'set' to overwrite with decayed value.
-            decay_targets = {
-                Hormone.ADRENALINE: config.ADRENALINE_HALFLIFE,
-                Hormone.CORTISOL: config.CORTISOL_HALFLIFE,
-                Hormone.DOPAMINE: config.DOPAMINE_HALFLIFE,
-            }
-            for h, halflife in decay_targets.items():
-                current_val = self.hormones.get(h)
-                decayed_val = self.bio_engine.decay_hormone(current_val, halflife, delta_time=1.0)
-                self.hormones.set(h, decayed_val)
-            
-            # 生物的な復帰ロジック (Replaces mechanical decay)
-            # 全てのパラメータは設定点（Set Point）に戻ろうとする
-            # Note: We iterate over ENUMS now, not string keys.
-            for h in Hormone:
-                if h in [Hormone.SURPRISE]: continue # Skip non-homeostatic
-
-                val = self.hormones.get(h)
-                # Map Enum to String for accessing homeostatic_set_points (if we kept that dict)
-                # Or refactor homeostatic_set_points to use Enums. 
-                # For now, let's map manual string keys from config if needed, or default to 50.0
-                
-                # Temporary Adapter: Map Enum to old dict keys for setpoints
-                key_map = {
-                    Hormone.DOPAMINE: "dopamine", Hormone.ADRENALINE: "adrenaline",
-                    Hormone.SEROTONIN: "serotonin", Hormone.OXYTOCIN: "oxytocin",
-                    Hormone.CORTISOL: "cortisol", Hormone.GLUCOSE: "glucose",
-                    Hormone.BOREDOM: "boredom", Hormone.STIMULATION: "stimulation"
-                }
-                
-                target = self.homeostatic_set_points.get(key_map.get(h, ""), 50.0)
-                
-                # 生体恒常性 (Homeostasis)
-                # targetに向かって徐々に戻ろうとする力
-                diff = target - val
-                if abs(diff) > 0.5:
-                    self.hormones.update(h, diff * 0.01) # 1% ずつ戻る
-
-                # Phase 5: Autonomous Feeding (自律摂食) 実装はこのループの外で行う
-                # 概日リズムによる設定点の変動
-                if h == Hormone.CORTISOL:
-                    # 朝 (6-9時) は覚醒のためCortisolが高い
-                    if 6 <= current_hour <= 9: 
-                        target += 30.0 
-                elif h == Hormone.GLUCOSE:
-                     # Glucoseは消費のみ(ここでの復帰はなし、摂取が必要)
-                     continue 
-                     
-                new_val = self.bio_engine.homeostasis_update(val, target, plasticity=0.01)
-                self.hormones.set(h, new_val)
-
-            # CPU負荷などは「外乱」として上乗せする
-            if cpu_percent > 50:
-                 self.hormones.update(Hormone.ADRENALINE, (cpu_percent - 50) / 5.0)
-
-            # Cortisol (Pain/Hunger) Update
-            if glucose < config.THRESHOLD_LOW:
-                 self.hormones.update(Hormone.CORTISOL, 1.0)
-            
-            # Clamp is automatic in HormoneManager, no loop needed!
-            
-            # Phase 30: 感情自己参照更新 h(e_t)
-            # 高い感情は自己増幅、低い感情は自己抑制
-            self.hormones.self_reference_update()
-            
-            # Phase 5: Autonomous Feeding Trigger
-            if self.hormones.get(Hormone.GLUCOSE) < 20.0:
-                 if self.time_step % 10 == 0:
-                     self._forage_food()
-
-
-
-            # --- Telemetry Export (Phase 7) ---
-            # Create a snapshot for the dashbaard
-            telemetry = {
-                "timestamp": time.time(),
-                "chemicals": self.hormones.as_dict(),
-                "status": {
-                    "is_sleeping": self.is_sleeping,
-                    "is_drowsy": self.is_drowsy,
-                    "geo_y": self.current_geo_y
-                }
-            }
-        
-        # Write to file (Outside Lock) with Retry for Windows
-        t_path = os.path.join(self.memory.save_dir, "brain_state.json")
-        tmp_path = t_path + ".tmp"
-        for _ in range(3):
-            try:
-                with open(tmp_path, "w", encoding="utf-8") as f:
-                    json.dump(telemetry, f)
-                os.replace(tmp_path, t_path)
-                break
-            except Exception:
-                time.sleep(0.05) # Wait for lock release
+        """ 生理代謝の更新 (Delegated to MetabolismManager) """
+        if self.metabolism_manager:
+            self.metabolism_manager.process(cpu_percent, memory_percent, current_hour)
 
     def process_autonomous_thought(self, heart_rate):
         """ Phase 18: 自律思考 (Dream Waves) """
@@ -1218,56 +1267,15 @@ class KanameBrain:
     # ⛏️ Phase 9.2: Minecraft Spatial Memory
     # ==========================================
     def process_spatial_memory(self, pos_data):
-        """
-        Minecraftの座標感覚を処理し、地質学的記憶にマッピングする。
-        (Phase 9.2 Memory Integration)
-        """
-        try:
-            if not pos_data: return
-            
-            mx, my, mz = pos_data.get('x'), pos_data.get('y'), pos_data.get('z')
-            if mx is None: return
-            
-            # 1. 座標の概念化 (Spatial Hashing)
-            # 16ブロック(1チャンク相当)ごとに1つの記憶とする
-            grid_x = int(mx) // 16
-            grid_z = int(mz) // 16
-            loc_key = f"LOC:{grid_x}:{grid_z}"
-            
-            # 2. 記憶へのアクセス・更新
-            # get_coords() は存在しなければ新規作成、あれば活性化(タイムスタンプ更新)を行う
-            # 戻り値 brain_coords は脳内での配置位置 [bx, by]
-            brain_coords = self.memory.get_coords(loc_key)
-            
-            # 3. 感情・ホルモン更新
-            with self.memory.lock:
-                val = self.memory.concepts.get(loc_key)
-                if val:
-                    # val format: [x, y, timestamp, count, valence]
-                    count = val[3] if len(val) >= 4 else 1
-                    
-                    if count <= 1:
-                        # ✨ 未知の場所 (New Discovery)
-                        print(f"🗺️ New Location Discovered: {loc_key}")
-                        self.hormones.update(Hormone.DOPAMINE, 10.0)
-                        self.hormones.update(Hormone.STIMULATION, 20.0)
-                        self.hormones.update(Hormone.GLUCOSE, -0.5) # 探索コスト
-                        
-                    elif count < 10:
-                        # 🛤️ 慣れてきた場所 (Familiarity)
-                        self.hormones.update(Hormone.SEROTONIN, 0.5)
-                        
-                    else:
-                        # 🏚️ 見飽きた場所 (Boredom)
-                        # 長居すると退屈が増える
-                        self.hormones.update(Hormone.BOREDOM, 0.2)
-            
-            # DEBUG: 極稀にマッピング情報を出す
-            if self.time_step % 100 == 0:
-                 print(f"📍 Mapped ({mx:.0f},{mz:.0f}) -> {loc_key} -> Brain{brain_coords}")
+        """ Delegate to SpatialCortex """
+        if self.spatial:
+            self.spatial.process_spatial_memory(pos_data)
 
-        except Exception as e:
-            print(f"⚠️ [BRAIN] Spatial Process Error: {e}")
+    def decide_minecraft_intent(self, state):
+        """ Delegate to SpatialCortex """
+        if self.spatial:
+            return self.spatial.decide_intent(state)
+        return None
 
     # ==========================================
     # 👁️ Phase 10: Vision & Visual Cortex
@@ -1365,3 +1373,68 @@ class KanameBrain:
 
 
     # Phase 15.1: Motor gradient methods moved to motor_cortex.py
+
+    # Phase 21: Cognitive Game Loop Support
+    def think_soliloquy(self, sensory_text: str) -> str:
+        """
+        [Cognitive Loop]
+        視覚情報(テキスト)を受け取り、独り言(思考)を生成して返す。
+        MVPではルールベースで応答するが、将来的にはLLM/Tazunaと連携する。
+        """
+        # 1. 視覚情報をログ
+        print(f"\n👁️ [VISION] {sensory_text}")
+        
+        # Phase 12: Advanced Reasoning Loop
+        reasoning_context = ""
+        if hasattr(self, 'logic_engine'):
+             thought_stream = self.logic_engine.ponder(sensory_text)
+             if thought_stream.get("decision"):
+                 decision = thought_stream["decision"]
+                 print(f"🧠 THOUGHT STREAM: '{sensory_text}' -> {decision['name']} (Score: {decision.get('score', 0):.2f})")
+                 print(f"   Reason: {thought_stream.get('strategy', 'Unknown')}")
+                 reasoning_context = self.logic_engine.get_context_prompt(thought_stream)
+        
+        # 2. Tazunaの状態を取得
+        tazuna_mode = "NORMAL"
+        tazuna_temp = 1.0
+        if self.tazuna and hasattr(self.tazuna, 'current_signal'):
+             # Note: current_signal might not be stored, but we can assume defaults
+             pass
+
+        # 3. 思考生成 (Phase 16: Logic -> Ollama)
+        if hasattr(self, 'translator') and self.translator and reasoning_context:
+            thought = self.translator.generate_response(sensory_text, reasoning_context)
+            if thought:
+                print(f"🗣️ [KANAME] {thought}")
+                return thought
+
+        # Fallback: Dummy Logic for MVP
+        thought = ""
+        
+        if "壁" in sensory_text:
+             thought += "壁があるな。ぶつからないように避けよう。"
+        if "餌" in sensory_text:
+             thought += "お、餌を見つけた。"
+             
+        # 方向の決定 (GameParserが理解できる言葉を入れる)
+        intent = ""
+        if "北に壁" in sensory_text and "西に壁" not in sensory_text:
+             intent = "左(西)に逃げよう。"
+        elif "北に壁" in sensory_text:
+             intent = "右(東)に行こう。"
+        elif "餌は上" in sensory_text or "北方向" in sensory_text:
+             intent = "上(北)に進もう。"
+        elif "餌は下" in sensory_text or "南方向" in sensory_text:
+             intent = "下(南)に進もう。"
+        elif "餌は左" in sensory_text or "西方向" in sensory_text:
+             intent = "左(西)に進もう。"
+        elif "餌は右" in sensory_text or "東方向" in sensory_text:
+             intent = "右(東)に進もう。"
+        else:
+             intent = "とりあえず前に進もう。" # Default
+
+        full_thought = f"{thought} {intent} {reasoning_context}"
+
+        # 4. 思考を出力
+        print(f"🧠 [THOUGHT] \"{full_thought}\"")
+        return full_thought

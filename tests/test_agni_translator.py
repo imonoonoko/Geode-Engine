@@ -5,11 +5,6 @@ Phase 16: AgniTranslator Unit Tests
 
 import unittest
 from unittest.mock import MagicMock, PropertyMock
-import sys
-import os
-
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class MockHormoneManager:

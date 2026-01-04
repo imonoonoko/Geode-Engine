@@ -21,6 +21,19 @@ from datetime import datetime
 
 import src.dna.config as config
 from src.body.hormones import Hormone
+from src.body.ollama_client import OllamaClient
+
+SYSTEM_PROMPT = """You are Kaname (カナメ), a close friend of the user.
+Character Rules:
+- Speak in casual Japanese (Tame-guchi, e.g. "〜だよ", "〜だね", "〜かな？").
+- First person pronoun: "私" (Watashi).
+- Second person pronoun: "君" (Kimi) or User's name.
+- Do NOT use polite forms like "Desu/Masu" (です・ます).
+- Keep your response short (1 sentence best, max 2).
+- Be empathetic and curious.
+- If the context implies an action, comment on it naturally.
+- NEVER explain your logic (like "Resonating..."). Just speak.
+"""
 
 
 class AgniTranslator:
@@ -31,6 +44,8 @@ class AgniTranslator:
     
     # 学習サンプル保存パス
     SAMPLES_PATH = "memory_data/agni_samples.json"
+    DISTILLATION_PATH = "data/training/agni_distillation.jsonl"
+
     
     def __init__(self, brain, agni=None):
         """
@@ -52,7 +67,10 @@ class AgniTranslator:
         # サンプル読み込み
         self._load_samples()
         
-        print(f"🗣️ AgniTranslator Initialized (Phase 16)")
+        # Phase 16: Ollama Client (Mouth)
+        self.ollama = OllamaClient()
+        
+        print(f"🗣️ AgniTranslator Initialized (Phase 16: Hybrid)")
         print(f"   Samples Loaded: {len(self.samples)}")
     
     def translate(self, use_agni=True) -> str:
@@ -199,6 +217,65 @@ class AgniTranslator:
             print(f"⚠️ [AgniTranslator] Error: {e}")
         
         return None
+
+    def generate_response(self, user_input: str, logic_context: str) -> str:
+        """
+        User input + Logic Context -> Natural Response
+        Priority: Ollama -> Agni (+Distill)
+        """
+        # 1. Ollama (Student) Fast Path
+        if self.ollama.is_alive():
+            prompt = f"Context: {logic_context}\nUser: {user_input}"
+            try:
+                res = self.ollama.generate(prompt, system=SYSTEM_PROMPT)
+                if res:
+                    return res
+            except Exception as e:
+                print(f"⚠️ [AgniTranslator] Ollama Failed: {e}")
+
+        # 2. Agni (Teacher) Fallback & Distillation
+        if not self.agni or not hasattr(self.agni, 'client') or not self.agni.client:
+            return None
+            
+        try:
+            prompt = f"""
+You are Kaname (カナメ).
+System Context: {logic_context}
+User: {user_input}
+
+Generate a short, casual response (Tame-guchi) based on the context.
+One sentence only.
+Kaname:
+"""
+            response = self.agni.client.generate_content(prompt)
+            if response and response.text:
+                result = response.text.strip().strip('"\'「」')
+                
+                # Distill (Save)
+                self._distill(user_input, logic_context, result)
+                return result
+                
+        except Exception as e:
+            print(f"⚠️ [AgniTranslator] Generation Error: {e}")
+            
+        return None
+
+    def _distill(self, user_input: str, context: str, response: str):
+        """ Save to JSONL for future training """
+        try:
+            record = {
+                "timestamp": datetime.now().isoformat(),
+                "input": user_input,
+                "context": context,
+                "response": response
+            }
+            
+            os.makedirs(os.path.dirname(self.DISTILLATION_PATH), exist_ok=True)
+            with open(self.DISTILLATION_PATH, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+                
+        except Exception as e:
+            print(f"⚠️ [Distillation] Save Error: {e}")
     
     def _save_sample(self, state: dict, output: str):
         """学習サンプルを保存"""

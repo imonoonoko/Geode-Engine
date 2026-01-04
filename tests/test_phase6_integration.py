@@ -8,12 +8,11 @@ import requests
 import threading
 
 # Project Root
-# Project Root
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
 # Import Brain
-from src.brain_stem.brain import GeodeBrain
+from src.brain_stem.brain import KanameBrain
 from src.dna import config
 
 def test_integration():
@@ -21,7 +20,7 @@ def test_integration():
     
     # 1. Initialize Brain
     print("🧠 Initializing Brain...")
-    brain = GeodeBrain()
+    brain = KanameBrain()
     # Mock Body HAL to avoid GUI requirement if possible
     brain.body_hal = None 
     

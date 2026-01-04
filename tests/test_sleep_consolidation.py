@@ -8,7 +8,7 @@ import math
 # Project Path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.brain_stem.brain import GeodeBrain
+from src.brain_stem.brain import KanameBrain
 from src.cortex.memory import GeologicalMemory
 from src.body.maya_synapse import SynapticStomach
 from src.body.hormones import Hormone
@@ -16,7 +16,7 @@ from src.body.hormones import Hormone
 class TestSleepConsolidation(unittest.TestCase):
     def setUp(self):
         # 簡易的なBrainの構成
-        self.brain = GeodeBrain()
+        self.brain = KanameBrain()
         
         # Memory と Synapse をリセット (クリーンテスト)
         self.brain.memory = GeologicalMemory(size=100) # 小さいサイズでテスト

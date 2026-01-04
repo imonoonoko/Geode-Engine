@@ -210,8 +210,8 @@ class SedimentaryCortex:
                 self.spatial_index[g_key] = []
             self.spatial_index[g_key].append(sediment)
 
-    def speak(self, trigger_word, strategy="RESONATE"):
-        """ 発掘作業 """
+    def speak(self, trigger_word, strategy="RESONATE", tazuna_signal=None):
+        """ 発掘作業 (Meta-Cognitive Modulated) """
         if trigger_word not in self.memory.concepts:
             return None # 知らない言葉は黙る
 
@@ -250,8 +250,54 @@ class SedimentaryCortex:
                      cx, cy = self.memory.get_coords(trigger_word)
                      # Update active thoughts in Brain? No, implicitly updating focus here.
 
-        search_radius = 40 # 探索半径
+        search_radius = 40 # Default 探索半径
         
+        # === Tazuna Modulation (Meta-Cognition) ===
+        if tazuna_signal:
+             search_radius = int(search_radius * tazuna_signal.radius_mod)
+             # Clamp radius safe range
+             search_radius = max(5, min(200, search_radius))
+             
+             # Phase 2: Vector Strategy (Orthogonal Jump)
+             if tazuna_signal.vector_strategy == "ORTHOGONAL":
+                 # 1. Get Trigger Embedding
+                 engine = None
+                 if hasattr(self, 'prediction_engine') and self.prediction_engine:
+                     engine = self.prediction_engine
+                 
+                 if engine:
+                     v_trigger = engine._get_embedding_api(trigger_word)
+                     if v_trigger is not None:
+                         # 2. Sample Candidates (Random)
+                         candidates = []
+                         with self.memory.lock:
+                             keys = list(self.memory.concepts.keys())
+                         
+                         # Sample 20 candidates
+                         samples = random.sample(keys, min(len(keys), 20))
+                         
+                         best_word = None
+                         min_abs_sim = 1.0 # Looking for 0.0 (Orthogonal)
+                         
+                         for w in samples:
+                             v_cand = engine._get_embedding_api(w)
+                             if v_cand is not None:
+                                 # Cosine Sim
+                                 dot = np.dot(v_trigger, v_cand)
+                                 norm = np.linalg.norm(v_trigger) * np.linalg.norm(v_cand)
+                                 if norm > 0:
+                                     sim = dot / norm
+                                     # We want sim near 0.0 -> minimize abs(sim)
+                                     if abs(sim) < min_abs_sim:
+                                         min_abs_sim = abs(sim)
+                                         best_word = w
+                        
+                         if best_word:
+                             print(f"📐 Orthogonal Jump: '{trigger_word}' -> '{best_word}' (Sim: {min_abs_sim:.2f})")
+                             # Override Trigger & Coords
+                             trigger_word = best_word
+                             cx, cy = self.memory.get_coords(trigger_word)
+         
         # 探索範囲のグリッドだけをチェック（高速化）
         start_gx = int((cx - search_radius) // self.grid_size)
         end_gx = int((cx + search_radius) // self.grid_size)

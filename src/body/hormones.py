@@ -50,7 +50,9 @@ class HormoneManager:
     def get(self, hormone: Hormone) -> float:
         """ Thread-safe Getter """
         with self.lock:
-            return self._data.get(hormone, 0.0)
+            val = self._data.get(hormone, 0.0)
+            # Type safety: ensure always returns float
+            return float(val) if val is not None else 0.0
 
     def update(self, hormone: Hormone, delta: float) -> None:
         """ 
@@ -153,7 +155,7 @@ class HormoneManager:
                 new_val = current - restore_force
                 
                 # Debug Log for Self-Ref (User Verification)
-                if abs(restore_force) > 0.01:
+                if config.DEBUG_MODE and abs(restore_force) > 0.01:
                     print(f"⚖️ [Self-Ref] Restoring {h.name}: {current:.2f} -> {new_val:.2f} (Force: -{restore_force:.3f})")
 
                 # クランプ

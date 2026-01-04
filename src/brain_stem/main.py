@@ -8,6 +8,9 @@ import psutil
 import numpy as np
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+load_dotenv() # Load .env file
+
 import src.dna.config as config
 from src.brain_stem.brain import KanameBrain 
 from src.body.kaname_body import KanameBody 
@@ -219,6 +222,10 @@ class MaiaSystem:
 
             time.sleep(1)
             self.time_step += 1
+            
+            # Phase 3: Activity Manager Update
+            if hasattr(self.brain, 'activity_manager'):
+                self.brain.activity_manager.update()
 
     def cognitive_loop(self):
         """ 視覚・思考層の更新ループ (Senses -> Brain -> Body) """

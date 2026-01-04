@@ -107,6 +107,7 @@ class AgniAccelerator:
             "concept": "{topic}",
             "valence": (float, -1.0 から 1.0, この概念の感情価),
             "description": (string, 日本語で短く生き生きとした説明),
+            "example_sentence": (string, その概念を使用した、短く自然な日本語の例文・構文),
             "associations": [ (関連する日本語の単語3つ) ],
             "source_persona": "{self.current_persona}"
         }}
@@ -171,30 +172,38 @@ class AgniAccelerator:
         # Apply emotional coloring
         self.memory.reinforce(concept, valence)
         
-        # 2. Sedimentary Deposit (Detailed description)
+        # 2. Sedimentary Deposit (Detailed description & Syntax)
         description = data.get("description", "")
+        example = data.get("example_sentence", "")
+        
+        cortex = getattr(self.brain, 'sedimentary_cortex', getattr(self.brain, 'cortex', None))
+        
+        if not cortex:
+             print(f"⚠️ Agni Injection Failed: No sedimentary_cortex found.")
+             return False
+
+        # A. Concept Description (Fragmented Learning)
         if description:
-            # We use the Sedimentary Cortex or Stomach to store the text?
-            # Let's use Sedimentary Cortex directly if possible, or Stomach
-            # SedimentaryCortex.learn calls Stomach.eat.
-            # We want to SKIP Stomach digestion for immediate "Knowledge", 
-            # OR feed Stomach for "Dream" consolidation.
+            cortex.learn(description, concept, surprise=0.5)
+            prefix = "💤 [Hypnopedia]" if self.brain.is_sleeping else "💉 [Agni]"
+            print(f"{prefix} Injected Concept: '{concept}' ({self.current_persona}): {description[:30]}...")
+
+        # B. Syntax Sample (Golden Fossil - Whole Deposit)
+        if example:
+            # Prefix for tagging (Since SQLite lacks meta fields)
+            tagged_text = f"{{{{Agni_Syntax}}}} {example}"
             
-            # Plan says: "Daily buffer" -> "Dream Compression".
-            # So feeding Stomach is correct logic for "Learning".
-            if hasattr(self.brain, 'cortex'):
-                # deposit(memory_entry) is for structured events, learn is for text
-                self.brain.cortex.learn(description, concept, surprise=0.5)
-                
-                # Hypnopedia Log
-                prefix = "💤 [Hypnopedia]" if self.brain.is_sleeping else "💉 [Agni]"
-                print(f"{prefix} Injected: '{concept}' ({self.current_persona}): {description[:30]}...")
-            elif hasattr(self.brain, 'sedimentary_cortex'):
-                 self.brain.sedimentary_cortex.learn(description, concept, surprise=0.5)
-                 prefix = "💤 [Hypnopedia]" if self.brain.is_sleeping else "💉 [Agni]"
-                 print(f"{prefix} Injected: '{concept}' ({self.current_persona}): {description[:30]}...")
-            else:
-                 print(f"⚠️ Agni Injection Failed: No cortex/sedimentary_cortex found.")
+            fossil_entry = {
+                "text": tagged_text,
+                "content": tagged_text, # schema compat
+                "timestamp": time.time(),
+                "source": "Agni_Syntax"
+            }
+            # Use deposit to keep sentence structure intact
+            cortex.deposit(fossil_entry)
+            print(f"🔥 [Agni:Teacher] 注入: \"{concept}\" (Valence: {valence:.1f})")
+            print(f"   └─ 例文: \"{example}\"")
+            print(f"   📦 [Memory] 化石保存完了 (Source: Agni_Syntax)")
 
         return True
 

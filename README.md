@@ -36,15 +36,18 @@ Geode-Engine/
 │   │   ├── sensory_cortex.py
 │   │   └── dream_engine.py
 │   ├── cortex/          # Memory and cognition
-│   │   ├── memory.py    # GeologicalMemory
-│   │   ├── sedimentary.py
-│   │   └── language_center.py
+│   │   ├── memory.py         # GeologicalMemory (HDC)
+│   │   ├── sedimentary.py    # Long-term memory (SQLite)
+│   │   ├── knowledge_graph.py # Tiered memory system
+│   │   ├── hdc_bridge.py     # **Phase 19: HDC-LLM Bridge**
+│   │   ├── agni_translator.py # LLM integration
+│   │   └── logic.py          # Reasoning engine
 │   ├── body/            # Hormones and metabolism
-│   │   ├── hormones.py
-│   │   └── metabolism.py
+│   │   ├── hormones.py       # Neuromodulator system
+│   │   └── metabolism.py     # Circadian rhythm
 │   ├── senses/          # Perception
-│   │   ├── visual_bridge.py
-│   │   └── mentor.py    # Agni Accelerator
+│   │   ├── visual_bridge.py  # Visual memory
+│   │   └── mentor.py         # Agni Accelerator (Gemini)
 │   └── games/           # Minecraft integration
 │       └── minecraft/
 ├── docs/                # Documentation
@@ -58,9 +61,19 @@ Geode-Engine/
 
 ### Prerequisites
 
-- Python 3.10+
-- Node.js 18+ (for Minecraft integration)
-- 4GB+ RAM recommended
+**Required:**
+- Python 3.10+ (3.11 recommended)
+- 8GB+ RAM (16GB recommended for optimal performance)
+- Windows 10/11, Linux, or macOS
+
+**Optional (for enhanced features):**
+- **Ollama** (for local LLM inference)
+  - Download from: https://ollama.ai
+  - Recommended models: `gemma2:2b` or `phi3:mini`
+- **Google Gemini API Key** (for Agni Accelerator)
+  - Free tier available at: https://ai.google.dev
+- **Node.js 18+** (for Minecraft integration)
+  - Download from: https://nodejs.org
 
 ### Installation
 
@@ -79,10 +92,12 @@ pip install -r requirements.txt
 
 # 4. Configure environment
 cp .env.example .env
-# Edit .env with your GEMINI_API_KEY
+# Edit .env with your GEMINI_API_KEY (optional)
 
 # 5. Run
 python src/brain_stem/main.py
+# Or use the startup script (Windows):
+# start_geode.bat
 ```
 
 ---
@@ -93,11 +108,17 @@ python src/brain_stem/main.py
 - SimHash-based concept encoding (768→1024 bit)
 - Efficient similarity search with KD-Tree
 
-### 2. Agni Accelerator
+### 2. HDC-LLM Bridge (Phase 19) 🆕
+- **Memory Recall**: Retrieves relevant memories from KnowledgeGraph and SedimentaryCortex
+- **G-Calculation**: Expected Free Energy minimization for action selection
+- **Dynamic Prompt Injection**: LLM prompts enriched with recalled memories
+- Enables context-aware conversations grounded in internal knowledge
+
+### 3. Agni Accelerator
 - Gemini API integration for knowledge injection
 - "Teacher → Graduation" paradigm (temporary dependency)
 
-### 3. Modular Brain Architecture
+### 4. Modular Brain Architecture
 - **MotorCortex**: Movement control
 - **SensoryCortex**: Visual perception
 - **DreamEngine**: Autonomous thought

@@ -35,8 +35,8 @@ class TestGameAIIntegration(unittest.TestCase):
         self.brain_mock.cortex = MagicMock()
         self.brain_mock.cortex.memory = self.memory_mock
     
-    def test_Geode_integration_initialization(self):
-        """Geode のモジュールと正しく接続されるかテスト"""
+    def test_kaname_integration_initialization(self):
+        """Kaname のモジュールと正しく接続されるかテスト"""
         agent = IntegratedRLAgent(action_size=4, brain=self.brain_mock)
         
         self.assertIsNotNone(agent.meta_learner)

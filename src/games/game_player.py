@@ -12,6 +12,8 @@ import numpy as np
 from typing import Optional, Dict, Any
 
 from src.games.active_inference_agent import ActiveInferenceAgent
+from src.games.game_translator import GameTranslator
+from src.games.game_parser import GameParser
 
 
 import tkinter as tk
@@ -146,6 +148,11 @@ class GamePlayer:
         # 外部コンポーネント
         self.vision = None
         self.game_browser = None
+
+        # [Cognitive Game Loop]
+        self.translator = GameTranslator()
+        self.parser = GameParser()
+        self.cognitive_mode = False # Default off for safety
         
         mode_str = "非表示" if headless else "ウィンドウ表示"
         print(f"🎮 Game Player Initialized ({mode_str})")
@@ -285,9 +292,42 @@ class GamePlayer:
         self.current_score = 0
         episode_steps = 0
         max_steps = 1000
+
+        # Cognitive Modeかどうか (SnakeGameのみ対応)
+        use_cognitive = self.cognitive_mode and self.current_game_type == "snake" and self.brain
         
         while self.is_playing and episode_steps < max_steps:
-            action = self.agent.select_action(obs, self.current_game_type)
+            
+            if use_cognitive:
+                # --- Cognitive Loop (Vision -> Thought -> Action) ---
+                
+                # 1. Vision (Translate)
+                text_perception = self.translator.translate(self.current_game_type, obs)
+                
+                # 2. Brain (Think)
+                # Brainに話しかけて独り言(Soliloquy)をもらう
+                # ※ think_soliloquy は Brain に実装した同期メソッド
+                if hasattr(self.brain, 'think_soliloquy'):
+                    thought_text = self.brain.think_soliloquy(text_perception)
+                else:
+                    thought_text = "脳が思考できません..."
+                
+                # 3. Action (Parse)
+                action = self.parser.parse(self.current_game_type, thought_text)
+                
+                # ログ出力 (Action)
+                print(f"🎮 [ACTION] Input: {action} (from '{thought_text}')")
+                
+                # 遅延 (思考時間のシミュレーション)
+                time.sleep(0.5) 
+
+            else:
+                # --- Fast Reflex Loop (Active Inference) ---
+                action = self.agent.select_action(obs, self.current_game_type)
+            
+            if not self.simple_game:
+                break
+                
             next_obs, reward, done, info = self.simple_game.step(action)
             
             self.current_score = info.get("score", 0)

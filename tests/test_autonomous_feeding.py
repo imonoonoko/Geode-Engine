@@ -9,14 +9,14 @@ import random
 # プロジェクトルートをパスに追加
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.brain_stem.brain import GeodeBrain
+from src.brain_stem.brain import KanameBrain
 from src.body.hormones import Hormone
 from src.body.knowledge_harvesters import SourceType, HarvestedContent
 
 class TestAutonomousFeeding(unittest.TestCase):
     def setUp(self):
         # Brain の生成
-        self.brain = GeodeBrain()
+        self.brain = KanameBrain()
         
         # モック化
         self.brain.feeder = MagicMock()

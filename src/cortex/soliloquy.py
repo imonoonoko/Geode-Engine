@@ -10,6 +10,8 @@ from src.body.hormones import Hormone
 import src.dna.config as config
 
 
+import re
+
 class SoliloquyManager:
     """
     能動的うわ言システム。
@@ -400,7 +402,9 @@ class SoliloquyManager:
             self.last_utterance_time = now
             self.last_utterance = content
             
+            
             # Phase 10: カタルシス効果を適用
+            content = self._clean_text(content) # Cleanup Agni Syntax
             self.apply_catharsis(content)
             
             if content:
@@ -408,6 +412,13 @@ class SoliloquyManager:
             return content
         
         return None
+    
+    def _clean_text(self, text: str) -> str:
+        """ Clean internal syntax like {{Agni_Syntax}} """
+        if not text: return ""
+        # Remove {{...}} tags
+        text = re.sub(r'\{\{.*?\}\}', '', text)
+        return text.strip()
     
     # =========================================
     # Helper Methods

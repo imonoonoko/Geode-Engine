@@ -6,16 +6,16 @@ import os
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.brain_stem.brain import GeodeBrain
+from src.brain_stem.brain import KanameBrain
 from src.body.hormones import Hormone
 
 class TestVision(unittest.TestCase):
     def setUp(self):
         # Brain init might take time, maybe mock parts of it?
         # For unit test speed, we might want to mock heavy components if possible.
-        # But GeodeBrain init is relatively fast except for Embedding loading.
+        # But KanameBrain init is relatively fast except for Embedding loading.
         # We'll use the real one but maybe mock heavy internal methods if needed.
-        self.brain = GeodeBrain()
+        self.brain = KanameBrain()
         
         # Mock hormones.update to verify calls without side effects
         self.brain.hormones.update = MagicMock()

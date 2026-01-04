@@ -1,2 +1,2 @@
 # tests/__init__.py
-# Geode Test Package
+# Kaname Test Package

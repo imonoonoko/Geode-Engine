@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 # ==========================================
 # ⚙️ System Configuration
 # ==========================================
+DEBUG_MODE = True # Toggle detailed logs
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MEMORY_DIR = os.path.join(BASE_DIR, "memory_data")
 TEMP_DIR = os.path.join(os.environ.get("TEMP", "."), "kaname_temp")
@@ -186,4 +187,30 @@ MENTOR_AUTO_TEACH = True # 自動教育ON
 # Source Tags
 SOURCE_USER = "User"
 SOURCE_AGNI = "Agni"
+
+
+# ==========================================
+# 💾 User Config Overlay (Persistence)
+# ==========================================
+import json
+USER_CONFIG_PATH = os.path.join(BASE_DIR, "user_config.json")
+
+def load_user_config():
+    """ Load override values from JSON """
+    if os.path.exists(USER_CONFIG_PATH):
+        try:
+            with open(USER_CONFIG_PATH, 'r', encoding='utf-8') as f:
+                updates = json.load(f)
+                
+            # Apply updates to globals
+            g = globals()
+            for k, v in updates.items():
+                if k in g:
+                    g[k] = v
+                    
+            print(f"💾 Loaded User Config: {len(updates)} items.")
+        except Exception as e:
+            print(f"⚠️ Failed to load user_config.json: {e}")
+
+load_user_config()
 

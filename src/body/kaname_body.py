@@ -5,7 +5,9 @@ import random
 import threading
 import pyautogui
 import queue
+import queue
 import src.dna.config as config
+from src.dna.enums import ActivityState
 try:
     from tkinterdnd2 import DND_FILES, TkinterDnD
     _DND_AVAILABLE = True
@@ -65,16 +67,34 @@ class KanameBody:
         self.game_menu.add_separator()
         self.game_menu.add_command(label="�️ 観戦モード切替", command=self._toggle_spectate)
         self.game_menu.add_command(label="�🛑 やめる (Stop)", command=self._stop_game)
-        self.context_menu.add_cascade(label="🎮 ゲームで遊ぶ (Games)", menu=self.game_menu)
+        # self.context_menu.add_cascade(label="🎮 ゲームで遊ぶ (Games)", menu=self.game_menu)
+        
+        # Activity Submenu (Phase 3 Integration)
+        self.activity_menu = tk.Menu(self.context_menu, tearoff=0)
+        # Unified Game Submenu
+        self.activity_menu.add_cascade(label="🎮 ゲーム (Games)", menu=self.game_menu)
+        self.activity_menu.add_command(label="🎓 自習 (Self Study)", command=lambda: self._request_activity("LESSON"))
+        self.activity_menu.add_separator()
+        self.activity_menu.add_command(label="🛑 やめる (Stop)", command=lambda: self._request_activity("STOP"))
+        
+        self.context_menu.add_cascade(label="🏃 活動 (Activity)", menu=self.activity_menu)
         
         self.context_menu.add_separator()
         self.context_menu.add_command(label="📊 ステータス (Status)", command=self._show_status)
         self.context_menu.add_command(label="💤 寝かしつける/起こす (Sleep/Wake)", command=self._toggle_sleep)
+        
+        # Debug Toggle
+        self.debug_var = tk.BooleanVar(value=config.DEBUG_MODE)
+        self.context_menu.add_checkbutton(label="🐛 デバッグ表示 (Debug)", variable=self.debug_var, command=self._toggle_debug)
+        
         self.context_menu.add_separator()
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label="⚙️ 設定 (Settings)", command=self._open_settings)
         self.context_menu.add_command(label="おやすみ (Exit)", command=self._quit_app)
         
         # Game Player (Phase C)
         self.game_player = None
+        self.last_game_type = "random" # For loop persistence
         
         # Drag & Drop Support
         if _DND_AVAILABLE:
@@ -90,6 +110,7 @@ class KanameBody:
 
         # Mouse Events
         self.canvas.bind("<Button-1>", self._on_poke)
+        self.canvas.bind("<Button-2>", self._toggle_chat)  # Middle-click to toggle chat
         self.root.bind("<B1-Motion>", self._on_move)
 
         # Physics State
@@ -191,8 +212,42 @@ class KanameBody:
             new_state = "Sleeping" if self.brain.is_sleeping else "Awake"
         self.say(f"...{new_state}...", 1.0)
 
+    def _open_settings(self):
+        """ Open Config Editor """
+        try:
+            from src.tools.config_editor import ConfigEditor
+            editor = ConfigEditor(self.root)
+            # Center on screen
+            x = self.root.winfo_screenwidth() // 2 - 200
+            y = self.root.winfo_screenheight() // 2 - 300
+            editor.geometry(f"+{x}+{y}")
+        except Exception as e:
+            print(f"⚠️ Failed to open settings: {e}")
+
+    def _toggle_debug(self):
+        """ Toggle Global Debug Mode """
+        config.DEBUG_MODE = self.debug_var.get()
+        state = "ON" if config.DEBUG_MODE else "OFF"
+        print(f"🐛 Debug Mode: {state}")
+        self.say(f"Debug: {state}", 1.0)
+
     def _start_game(self, game_type: str = "random"):
         """ Start playing a game """
+        # Force Brain Sync (Phase 17 Fix)
+        # 手動起動（メニュー選択）の場合も、脳の状態をGAMEに切り替えてSync切れを防ぐ
+        if hasattr(self.brain, 'activity_manager'):
+             # Enum比較が面倒なので文字列変換してチェック
+             current = str(self.brain.activity_manager.current_state.value)
+             if current != "game":
+                 # IDLE以外なら一旦停止
+                 if current != "idle":
+                     self.brain.activity_manager.request_activity("STOP")
+                 # GAME開始要求
+                 self.brain.activity_manager.request_activity("GAME")
+        
+        # 継続プレイ用に記録
+        self.last_game_type = game_type
+                 
         import random as rand
         try:
             from src.games.game_player import GamePlayer
@@ -286,6 +341,13 @@ class KanameBody:
             except Exception as e:
                 print(f"⚠️ File Read Error: {e}")
                 self.say("...読めない", 1.0)
+
+    def _request_activity(self, activity_name):
+        """ Helper to request activity from ActivityManager """
+        if hasattr(self.brain, 'activity_manager'):
+            self.brain.activity_manager.request_activity(activity_name)
+        else:
+            print("⚠️ ActivityManager not connected.")
 
     # ==========================================
     # 🖱️ Mouse Events & Input
@@ -416,6 +478,40 @@ class KanameBody:
         
         if self.is_alive:
             self.root.after(20, self._process_ui_queue)
+            
+            # Phase 17: Activity Sync (Brain -> Body)
+            # Sync every 1s (50 frames * 20ms) roughly, or just check every frame (cheap)
+            self._check_activity_sync()
+
+    def _check_activity_sync(self):
+        """ Sync Body State with Brain Activity State """
+        if not hasattr(self.brain, 'activity_manager'):
+            return
+            
+        try:
+            # Non-blocking peek
+            current_act = self.brain.activity_manager.current_state
+            # Enum to string matching
+            act_str = str(current_act.value) # "game", "lesson", "idle" (ActivityState.GAME.value is 'game')
+
+            # --- GAME SYNC ---
+            if act_str == "game":
+                # 脳はゲームモードだが、体が遊んでいない（ゲームオーバー後など）
+                if not self.game_player or not self.game_player.is_playing:
+                     print(f"🔄 Auto-Restarting Game: {self.last_game_type}")
+                     self._start_game(self.last_game_type)
+            elif act_str == "idle":
+                 # Stop game if playing (and not triggered manually? active manager prevails)
+                 if self.game_player and self.game_player.is_playing:
+                     print("🛑 Body syncing to Brain Activity: STOP GAME")
+                     self._stop_game()
+            
+            # --- LESSON SYNC ---
+            # LessonRoom manages its own flow, but if we need UI overlays, do it here.
+            
+        except Exception as e:
+            # print(f"Sync Error: {e}")
+            pass
 
     def _on_chat_submit(self, event):
         """ Handle Chat Input """
@@ -435,6 +531,20 @@ class KanameBody:
         self.is_chat_visible = False
         self.root.focus_set()
 
+    def _toggle_chat(self, event=None):
+        """ Toggle chat window visibility (Double-click or called externally) """
+        if self.is_chat_visible:
+            self.chat_window.withdraw()
+            self.is_chat_visible = False
+        else:
+            # Position chat below the orb
+            x = self.root.winfo_x()
+            y = self.root.winfo_y() + config.WINDOW_HEIGHT + 5
+            self.chat_window.geometry(f"300x30+{x}+{y}")
+            self.chat_window.deiconify()
+            self.chat_entry.focus_set()
+            self.is_chat_visible = True
+
     def _on_focus_out(self, event):
         """ Auto-hide when focus is lost (clicked away) """
         # Slight delay to allow focus transfer
@@ -443,10 +553,9 @@ class KanameBody:
     def _check_focus_and_hide(self):
         try:
             # If focus is NOT on entry anymore, hide.
-            # Note: focus_get() returns widget object.
             focused = self.root.focus_get()
             if focused != self.chat_entry:
-                print("👻 Chat lost focus, hiding.")
+                # Hide chat when user clicks away
                 self.chat_window.withdraw()
                 self.is_chat_visible = False
         except:
@@ -536,8 +645,11 @@ class KanameBody:
         start_x = cx + random.randint(-50, 50)
         start_y = config.WINDOW_HEIGHT // 4 # Top area
         
-        text_id = self.canvas.create_text(start_x, start_y, text=text, fill="white", font=("MS Gothic", 11, "bold"))
-        self.bubbles.append({"id": text_id, "x": start_x, "y": start_y, "life": 80, "speed": random.uniform(0.3, 0.8)})
+        # Truncate long text to prevent overflow (max 30 chars displayed)
+        display_text = text[:50] + "..." if len(text) > 50 else text
+        
+        text_id = self.canvas.create_text(start_x, start_y, text=display_text, fill="white", font=("MS Gothic", 10, "bold"), width=200)
+        self.bubbles.append({"id": text_id, "x": start_x, "y": start_y, "life": 100, "speed": random.uniform(0.3, 0.6)})
 
     def animation_loop(self):
         """ Animation Logic (Thread) -> Queue Updates """
@@ -708,6 +820,11 @@ class KanameBody:
                         self.target_y = random.randint(0, self.screen_h - 300)
                         found_target = True
                         print(f"👻 Wandering due to Boredom ({boredom:.1f}%)")
+                        
+                        # Phase 19: Trigger autonomous LLM conversation (10% chance)
+                        if random.random() < 0.1 and hasattr(self.brain, '_autonomous_speak'):
+                            import threading
+                            threading.Thread(target=self.brain._autonomous_speak, daemon=True).start()
 
             # Retina Guided Movement (Phase 14: Lowered Threshold)
             # 30.0 -> 15.0 to allow movement even in mild moods
@@ -794,8 +911,19 @@ class KanameBody:
             # Phase 10: Micro-Movements (Fidgeting) - 生きている感を出す
             # ドーパミンが低くても少し動く (Brownian Motion)
             # Phase 14: Boredom increases fidget frequency
-            fidget_chance = 0.1 + (boredom * 0.002) # Max +0.2 at 100% -> 0.3
-            
+            fidget_chance = 0.1 + (boredom * 0.002) # Max +0.2 at 100% ->
+            # 3. Speech Check (Consumes Brain speech_queue)
+            try:
+                while not self.brain.speech_queue.empty():
+                    speech = self.brain.speech_queue.get_nowait()
+                    if speech:
+                        print(f"🔊 Body processing speech: {speech.get('text', '')[:30]}...")
+                        self._create_bubble_ui(speech.get("text", ""))
+                        self.brain.speech_queue.task_done()
+            except Exception as e:
+                print(f"⚠️ Body Speech Error: {e}")
+
+            # 4. Boredom & Movement Logic
             if not found_target and not self.brain.is_sleeping and random.random() < fidget_chance:
                 fidget_x = random.randint(-2, 2)
                 fidget_y = random.randint(-2, 2)

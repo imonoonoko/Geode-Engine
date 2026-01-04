@@ -156,13 +156,17 @@ class TestBrainIntegration(unittest.TestCase):
 
     def test_spatial_memory_logic(self):
         """空間記憶ロジックが正しくホルモンを更新する"""
-        from src.brain_stem.brain import GeodeBrain
+        from src.brain_stem.brain import KanameBrain
         from src.body.hormones import Hormone
         from unittest.mock import MagicMock
         
-        brain = GeodeBrain()
+        brain = KanameBrain()
         brain.memory = MagicMock()
         brain.hormones = MagicMock()
+        # Fix: Recursive Mocking for SpatialCortex
+        if hasattr(brain, 'spatial'):
+            brain.spatial.memory = brain.memory
+            brain.spatial.hormones = brain.hormones
         
         # Case A: New Location (count <= 1)
         brain.memory.get_coords.return_value = [512, 512]
@@ -175,13 +179,17 @@ class TestBrainIntegration(unittest.TestCase):
     
     def test_decide_minecraft_intent(self):
         """勾配に基づく行動決定ロジックのテスト"""
-        from src.brain_stem.brain import GeodeBrain
+        from src.brain_stem.brain import KanameBrain
         from src.body.hormones import Hormone
         from unittest.mock import MagicMock
         
-        brain = GeodeBrain()
+        brain = KanameBrain()
         brain.hormones = MagicMock()
         brain.memory = MagicMock()
+        # Fix: Recursive Mocking for SpatialCortex
+        if hasattr(brain, 'spatial'):
+            brain.spatial.memory = brain.memory
+            brain.spatial.hormones = brain.hormones
         
         # Mock memory gradient: North is best (3.14)
         # North scores highest

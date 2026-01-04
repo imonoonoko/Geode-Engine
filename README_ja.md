@@ -30,24 +30,28 @@ Geode-Engineは、**地質学的メタファー**を用いて認知をモデル�
 ```
 Geode-Engine/
 ├── src/
-│   ├── brain_stem/      # 脳幹ロジック
-│   │   ├── brain.py     # メインクラス
-│   │   ├── motor_cortex.py    # 運動野
-│   │   ├── sensory_cortex.py  # 感覚野
-│   │   └── dream_engine.py    # 夢エンジン
+│   ├── brain_stem/      # 脳幹（コア機能）
+│   │   ├── brain.py     # メインのGeodeBrainクラス
+│   │   ├── motor_cortex.py
+│   │   ├── sensory_cortex.py
+│   │   └── dream_engine.py
 │   ├── cortex/          # 記憶と認知
-│   │   ├── memory.py    # 地質学的記憶
-│   │   └── language_center.py # 言語中枢
+│   │   ├── memory.py         # 地質学的記憶 (HDC)
+│   │   ├── sedimentary.py    # 長期記憶 (SQLite)
+│   │   ├── knowledge_graph.py # 階層化記憶システム
+│   │   ├── hdc_bridge.py     # **Phase 19: HDC-LLM Bridge**
+│   │   ├── agni_translator.py # LLM統合
+│   │   └── logic.py          # 推論エンジン
 │   ├── body/            # ホルモンと代謝
-│   │   ├── hormones.py
-│   │   └── metabolism.py
-│   ├── senses/          # 感覚器
-│   │   ├── visual_bridge.py
-│   │   └── mentor.py    # アグニ・アクセラレータ
+│   │   ├── hormones.py       # 神経調節物質システム
+│   │   └── metabolism.py     # 概日リズム
+│   ├── senses/          # 知覚
+│   │   ├── visual_bridge.py  # 視覚記憶
+│   │   └── mentor.py         # Agniアクセラレータ (Gemini)
 │   └── games/           # Minecraft統合
 │       └── minecraft/
 ├── docs/                # ドキュメント
-├── tests/               # テスト
+├── tests/               # ユニットテスト
 └── README.md
 ```
 
@@ -57,9 +61,19 @@ Geode-Engine/
 
 ### 前提条件
 
-- Python 3.10以上
-- Node.js 18以上（Minecraft統合用）
-- 4GB以上のRAM推奨
+**必須:**
+- Python 3.10以上（3.11推奨）
+- 8GB以上のRAM（最適なパフォーマンスには16GB推奨）
+- Windows 10/11、Linux、またはmacOS
+
+**オプション（拡張機能用）:**
+- **Ollama**（ローカルLLM推論用）
+  - ダウンロード: https://ollama.ai
+  - 推奨モデル: `gemma2:2b` または `phi3:mini`
+- **Google Gemini APIキー**（Agniアクセラレータ用）
+  - 無料枠あり: https://ai.google.dev
+- **Node.js 18以上**（Minecraft統合用）
+  - ダウンロード: https://nodejs.org
 
 ### インストール
 
@@ -78,10 +92,12 @@ pip install -r requirements.txt
 
 # 4. 環境設定
 cp .env.example .env
-# .env を編集して GEMINI_API_KEY を設定
+# .env を編集して GEMINI_API_KEY を設定（オプション）
 
 # 5. 実行
 python src/brain_stem/main.py
+# または起動スクリプトを使用（Windows）:
+# start_geode.bat
 ```
 
 ---
@@ -92,11 +108,17 @@ python src/brain_stem/main.py
 - SimHashベースの概念エンコーディング（768→1024ビット）
 - KD-Treeによる効率的な類似検索
 
-### 2. アグニ・アクセラレータ
+### 2. HDC-LLMブリッジ（Phase 19）🆕
+- **記憶想起**: KnowledgeGraphとSedimentaryCortexから関連記憶を取得
+- **G計算**: 期待自由エネルギー最小化による行動選択
+- **動的プロンプト注入**: 想起した記憶でLLMプロンプトを強化
+- 内部知識に基づいた文脈を考慮した会話を実現
+
+### 3. アグニ・アクセラレータ
 - Gemini APIによる知識注入
 - 「教師→卒業」パラダイム（一時的な依存）
 
-### 3. モジュール式脳アーキテクチャ
+### 4. モジュール式脳アーキテクチャ
 - **MotorCortex（運動野）**: 運動制御
 - **SensoryCortex（感覚野）**: 視覚知覚
 - **DreamEngine（夢エンジン）**: 自律思考

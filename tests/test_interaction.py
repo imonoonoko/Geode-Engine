@@ -11,7 +11,7 @@ from src.body.hormones import Hormone
 
 class TestInteraction(unittest.TestCase):
     def setUp(self):
-        # Mock GeodeBrain
+        # Mock KanameBrain
         self.mock_core_brain = MagicMock()
         self.mock_core_brain.hormones = MagicMock()
         self.mock_core_brain.hormones.get.side_effect = lambda h: 0.0 # Default

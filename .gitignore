@@ -13,8 +13,17 @@ node_modules/
 
 # Data (contains personal memories)
 memory_data/
+memory/
+food/
 *.pkl
 *.db
+*.sqlite
+*.gml
+
+# Claude/AI session data
+.claude/
+.gemini/
+.agent/
 
 # IDE
 .vscode/
@@ -23,13 +32,24 @@ memory_data/
 # Cache
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
 
 # Logs
 *.log
+logs/
 
 # Archives
 archived_prototypes/
 
+# Large model files
+*.pt
+*.bin
+*.onnx
+models/
+
 # OS
 .DS_Store
 Thumbs.db
+
+# Config with personal paths
+user_config.json

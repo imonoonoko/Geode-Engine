@@ -176,33 +176,25 @@ class LanguageCenter:
         if not cortex or not cortex.all_fragments:
             return None
             
-        # Optimization: Sample 50 random fragments and pick the best valence match
-        # (Linear scan of all might be slow later, but okay for now)
         best_frag = None
         min_diff = 10.0
         
         with cortex.lock:
+            # --- Phase 2: Golden Fossil Excavation (Agni Syntax) ---
+            # Prioritize fragments that start with {{Agni_Syntax}}
+            agnostic_fossils = [f for f in cortex.all_fragments if "{{Agni_Syntax}}" in f.get('text', '')]
+            
+            if agnostic_fossils:
+                # If we have gold fossils, prefer them!
+                # Maybe filter by valence if possible?
+                # For now, just pick a random one to encourage learning the teacher's structure.
+                chosen = random.choice(agnostic_fossils)
+                # print(f"🔍 [Fossil] Agni Syntax Excavated: {chosen['text'][:20]}...")
+                return chosen['text']
+            
+            # --- Legacy Retrieval ---
             # Random sample to avoid repetition
             candidates = random.sample(cortex.all_fragments, min(50, len(cortex.all_fragments)))
-            
-            for frag in candidates:
-                text = frag.get('text', '')
-                if len(text) < 5: continue # Too short
-                
-                # Get valence of this fragment (using Cortex's method or Memory lookup)
-                # We need a robust way to get valence. 
-                # Let's use the Brain's memory valence lookup for the text (if it's a concept)
-                # Or if it's a sentence, we might not have a valence.
-                # Heuristic: Check valence of the 'trigger word' if stored?
-                # Stored fragments don't have valence tag usually.
-                # We will approximate via "Memory.get_valence(text)" -> might fail for long text.
-                # So we assume the text IS the experience description.
-                # Let's try to infer valence from the text (Janome -> average words).
-                
-                # For now, simplistic random pick slightly biased by length? 
-                # No, User requested "Similar Mood/Situation".
-                # Let's just pick random for V1 Scaffolding, and refine retrieval later.
-                pass
             
             # Temporary: Random valid fragment
             valid = [f['text'] for f in candidates if len(f.get('text','')) > 5]
@@ -216,6 +208,9 @@ class LanguageCenter:
         Parse text and replace content words with Slots.
         Returns list of tokens/slots.
         """
+        # Cleanup Agni Tag if present
+        text = text.replace("{{Agni_Syntax}}", "").strip()
+        
         tokens = self.tokenizer.tokenize(text)
         structure = []
         
@@ -328,7 +323,10 @@ class LanguageCenter:
         return best_word
 
     def _check_pos(self, word, target_pos):
-        """ Check if word matches target POS """
+        """ Check if word matches target POS. Also rejects long phrases and system keys. """
+        if len(word) > 20: return False # Safety: Don't inject sentences into slots
+        if word.startswith("gm_") or word.startswith("LOC:"): return False # Hide internal variables
+        
         # Only check the first token's POS
         tokens = self.tokenizer.tokenize(word)
         for t in tokens:
